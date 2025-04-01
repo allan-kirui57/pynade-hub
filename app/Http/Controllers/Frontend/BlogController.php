@@ -29,7 +29,7 @@ class BlogController extends Controller
         $categories = $this->contentService->getCategoriesWithCounts('blog');
         $popularTags = $this->contentService->getPopularTags('blog');
 
-        return Inertia::render('frontend/blogs/Index', [
+        return Inertia::render('frontend/blogs', [
             'blogs' => $blogs,
             'categories' => $categories,
             'popularTags' => $popularTags,

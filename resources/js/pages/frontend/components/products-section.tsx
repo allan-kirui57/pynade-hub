@@ -3,7 +3,7 @@ import { Link } from '@inertiajs/react';
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ThumbsUp, ThumbsDown, MessageSquare, ExternalLink, StarIcon, GitlabIcon as GitHubLogoIcon } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, MessageSquare, ExternalLink, Star, GitlabIcon as GitHubLogoIcon } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
@@ -132,9 +132,9 @@ export default function ProductsSection() {
 
     return (
         <section id="products" className="w-full py-12 md:py-24 bg-muted/30">
-            <div className="container px-4 md:px-6">
-                <div className="flex flex-col items-start gap-4 md:flex-row md:justify-between md:gap-8">
-                    <div className="space-y-2">
+            <div className="container mx-auto px-4 md:px-6">
+                <div className="flex flex-col items-center gap-4 md:flex-row md:justify-between md:gap-8">
+                    <div className="space-y-2 text-center md:text-left">
                         <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">Featured Products</h2>
                         <p className="max-w-[700px] text-muted-foreground">
                             Discover innovative tech products and open source projects across various industries.
@@ -151,7 +151,7 @@ export default function ProductsSection() {
                 </div>
 
                 <Tabs defaultValue="All" className="mt-8">
-                    <TabsList className="mb-6 flex flex-wrap">
+                    <TabsList className="mb-6 flex flex-wrap justify-center md:justify-start">
                         {categories.map((category) => (
                             <TabsTrigger key={category} value={category} className="mb-2">
                                 {category}
@@ -180,7 +180,7 @@ export default function ProductsSection() {
                                             <div className="flex items-center gap-2">
                                                 {product.isOpenSource && (
                                                     <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                                                        <StarIcon className="h-3.5 w-3.5" />
+                                                        <Star className="h-3.5 w-3.5" />
                                                         <span>{product.stars?.toLocaleString()}</span>
                                                     </div>
                                                 )}

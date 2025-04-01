@@ -1,12 +1,23 @@
-import { Link } from '@inertiajs/react';
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import React from 'react';
+import { Link } from '@inertiajs/react';
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+interface Blog {
+    id: number;
+    title: string;
+    excerpt: string;
+    image: string;
+    date: string;
+    readTime: string;
+    category: string;
+    tags: string[];
+}
 
 export default function BlogSection() {
     // Sample blog data
-    const blogs = [
+    const blogs: Blog[] = [
         {
             id: 1,
             title: "Getting Started with Next.js 14",
@@ -37,16 +48,16 @@ export default function BlogSection() {
             category: "Accessibility",
             tags: ["Accessibility", "Web Development", "UX"],
         },
-    ]
+    ];
 
     // Categories for filtering
-    const categories = ["All", "Development", "AI", "Accessibility", "Design", "DevOps"]
+    const categories = ["All", "Development", "AI", "Accessibility", "Design", "DevOps"];
 
     return (
         <section id="blog" className="w-full py-12 md:py-24 bg-background">
-            <div className="container px-4 md:px-6">
-                <div className="flex flex-col items-start gap-4 md:flex-row md:justify-between md:gap-8">
-                    <div className="space-y-2">
+            <div className="container mx-auto px-4 md:px-6">
+                <div className="flex flex-col items-center gap-4 md:flex-row md:justify-between md:gap-8">
+                    <div className="space-y-2 text-center md:text-left">
                         <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">Latest Blog Posts</h2>
                         <p className="max-w-[700px] text-muted-foreground">
                             Stay updated with the latest trends, tutorials, and insights in technology and development.
@@ -61,7 +72,7 @@ export default function BlogSection() {
                 </div>
 
                 <Tabs defaultValue="All" className="mt-8">
-                    <TabsList className="mb-6 flex flex-wrap">
+                    <TabsList className="mb-6 flex flex-wrap justify-center md:justify-start">
                         {categories.map((category) => (
                             <TabsTrigger key={category} value={category} className="mb-2">
                                 {category}
@@ -87,7 +98,7 @@ export default function BlogSection() {
                                             <span>{blog.readTime}</span>
                                         </div>
                                         <CardTitle className="line-clamp-2 hover:text-primary">
-                                            <Link href="#">{blog.title}</Link>
+                                            <Link href={route('blogs.show', blog.id)}>{blog.title}</Link>
                                         </CardTitle>
                                     </CardHeader>
                                     <CardContent>
@@ -110,6 +121,5 @@ export default function BlogSection() {
                 </Tabs>
             </div>
         </section>
-    )
+    );
 }
-

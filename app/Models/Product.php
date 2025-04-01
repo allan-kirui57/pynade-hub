@@ -48,4 +48,16 @@ class Product extends Model
     {
         return $this->morphMany(Vote::class, 'votable');
     }
+    public function relatedProducts()
+    {
+        return $this->where('category_id', $this->category_id)
+            ->where('id', '!=', $this->id)
+            ->take(3)
+            ->get();
+    }
+
+    public function scopePublished($query)
+    {
+        return $query->where('is_published', true);
+    }
 }

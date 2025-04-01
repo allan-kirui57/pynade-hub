@@ -1,12 +1,28 @@
+import React from 'react';
 import { Link } from '@inertiajs/react';
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { MapPin, Building, Clock, DollarSign } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { MapPin, Building, Clock, DollarSign } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+
+interface Vacancy {
+    id: number;
+    title: string;
+    company: string;
+    location: string;
+    type: "Remote" | "Hybrid" | "On-site";
+    salaryRange: string;
+    postedDate: string;
+    languages: string[];
+}
+
+interface TypeVariants {
+    [key: string]: "default" | "secondary" | "outline";
+}
 
 export default function JobsSection() {
     // Sample vacancies data
-    const vacancies = [
+    const vacancies: Vacancy[] = [
         {
             id: 1,
             title: "Senior Frontend Developer",
@@ -37,20 +53,20 @@ export default function JobsSection() {
             postedDate: "3 days ago",
             languages: ["JavaScript", "Node.js", "React", "MongoDB"],
         },
-    ]
+    ];
 
     // Job type badge variants
-    const typeVariants = {
+    const typeVariants: TypeVariants = {
         Remote: "default",
         Hybrid: "secondary",
         "On-site": "outline",
-    }
+    };
 
     return (
         <section id="vacancies" className="w-full py-12 md:py-24 bg-background">
-            <div className="container px-4 md:px-6">
-                <div className="flex flex-col items-start gap-4 md:flex-row md:justify-between md:gap-8">
-                    <div className="space-y-2">
+            <div className="container mx-auto px-4 md:px-6">
+                <div className="flex flex-col items-center gap-4 md:flex-row md:justify-between md:gap-8">
+                    <div className="space-y-2 text-center md:text-left">
                         <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">Job Opportunities</h2>
                         <p className="max-w-[700px] text-muted-foreground">
                             Find your next career opportunity in tech with companies looking for talented professionals like you.
@@ -58,16 +74,10 @@ export default function JobsSection() {
                     </div>
                     <div className="flex flex-col gap-2 sm:flex-row">
                         <Link
-                            href="/vacancies"
+                            href={route('vacancies.index')}
                             className="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-8 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                         >
                             View All Jobs
-                        </Link>
-                        <Link
-                            href="/post-vacancy"
-                            className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                        >
-                            Post a Job
                         </Link>
                     </div>
                 </div>
@@ -85,7 +95,7 @@ export default function JobsSection() {
                                         </div>
                                     </div>
                                     <Badge
-                                        variant={typeVariants[vacancy.type] as "default" | "secondary" | "outline"}
+                                        variant={typeVariants[vacancy.type]}
                                         className="mt-2 sm:mt-0"
                                     >
                                         {vacancy.type}
@@ -123,12 +133,11 @@ export default function JobsSection() {
                 </div>
 
                 <div className="mt-8 flex justify-center">
-                    <Link href="/vacancies">
+                    <Link href={route('vacancies.index')}>
                         <Button variant="outline">Browse All Job Listings</Button>
                     </Link>
                 </div>
             </div>
         </section>
-    )
+    );
 }
-

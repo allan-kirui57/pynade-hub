@@ -35,7 +35,7 @@ class Tag extends Model
     }
 
     /**
-     * Get all jobs with this tag.
+     * Get all vacancies with this tag.
      */
     public function vacancies()
     {
@@ -55,8 +55,8 @@ class Tag extends Model
      */
     public static function getPopularTags(string $group = null, int $limit = 10)
     {
-        $query = self::withCount(['blogs', 'products', 'jobs'])
-            ->orderByRaw('blogs_count + products_count + jobs_count DESC')
+        $query = self::withCount(['blogs', 'products', 'vacancies'])
+            ->orderByRaw('blogs_count + products_count + vacancies_count DESC')
             ->limit($limit);
 
         if ($group) {
