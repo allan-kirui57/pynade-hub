@@ -4,11 +4,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreBlogRequest;
 use App\Models\Blog;
 use App\Models\Category;
 use App\Models\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 
@@ -47,8 +50,8 @@ class BlogController extends Controller
 
     public function create()
     {
-        $categories = Category::forModule('blog')->active()->get(['id', 'name']);
-        $tags = Tag::inGroup('blog')->get(['id', 'name']);
+        $categories = Category::get(['id', 'name']);
+        $tags = Tag::get(['id', 'name']);
 
         return Inertia::render('admin/blogs/Create', [
             'categories' => $categories,
@@ -56,47 +59,34 @@ class BlogController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreBlogRequest $request)
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'required|string',
-            'excerpt' => 'nullable|string',
-            'featured_image' => 'nullable|image|max:2048',
-            'category_ids' => 'required|array',
-            'category_ids.*' => 'exists:categories,id',
-            'primary_category_id' => 'required|exists:categories,id',
-            'tags' => 'nullable|array',
-            'published_at' => 'nullable|date',
-        ]);
 
+        try {
+            DB::beginTransaction();
+            $data = $request->validated();
+            $data['user_id'] = Auth::id();
+            $blog = Blog::create($data);
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => 'An error occurred while creating the blog.'])->withInput();
+        }
         // Handle image upload
         if ($request->hasFile('featured_image')) {
             $path = $request->file('featured_image')->store('blogs', 'public');
             $validated['featured_image'] = $path;
         }
 
-        // Create blog
-        $blog = new Blog();
-        $blog->title = $validated['title'];
-        $blog->slug = Str::slug($validated['title']);
-        $blog->content = $validated['content'];
-        $blog->excerpt = $validated['excerpt'] ?? Str::limit(strip_tags($validated['content']), 150);
-        $blog->featured_image = $validated['featured_image'] ?? null;
-        $blog->published_at = $validated['published_at'] ?? now();
-        $blog->user_id = Auth::id();
-        $blog->primary_category_id = $validated['primary_category_id'];
-        $blog->save();
-
         // Sync categories
-        $blog->categories()->sync($validated['category_ids']);
+//        $blog->categories()->sync($data['category_ids']);
 
         // Sync tags
-        if (isset($validated['tags']) && !empty($validated['tags'])) {
-            $blog->syncTags($validated['tags'], 'blog');
+        if (!empty($data['tags'])) {
+            $blog->syncTags($data['tags'], 'blog');
         }
 
-        return redirect()->route('admin.blogs.index')
+        return Inertia::render('admin/blogs/Index')
             ->with('success', 'Blog created successfully.');
     }
 

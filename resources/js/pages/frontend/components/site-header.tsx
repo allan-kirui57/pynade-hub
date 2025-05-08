@@ -19,13 +19,13 @@ export function SiteHeader() {
                         <span className="hidden font-bold sm:inline-block">TechHub</span>
                     </Link>
                     <nav className="hidden md:flex md:gap-6">
-                        <Link href={route('blogs.index')} className="text-sm font-medium transition-colors hover:text-primary">
+                        <Link href={'/blogs'} className="text-sm font-medium transition-colors hover:text-primary">
                             Blog
                         </Link>
-                        <Link href={route('products.index')} className="text-sm font-medium transition-colors hover:text-primary">
+                        <Link href={'/products'} className="text-sm font-medium transition-colors hover:text-primary">
                             Products
                         </Link>
-                        <Link href={route('vacancies.index')} className="text-sm font-medium transition-colors hover:text-primary">
+                        <Link href={'/vacancies'} className="text-sm font-medium transition-colors hover:text-primary">
                             Jobs
                         </Link>
                         <Link href="#" className="text-sm font-medium transition-colors hover:text-primary">

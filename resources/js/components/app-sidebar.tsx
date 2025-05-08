@@ -18,6 +18,16 @@ const mainNavItems: NavItem[] = [
         href: '/admin/blogs',
         icon: BookOpen,
     },
+    {
+        title: 'Products',
+        href: '/admin/products',
+        icon: BookOpen,
+    },
+    {
+        title: 'Vacancies',
+        href: '/admin/vacancies',
+        icon: BookOpen,
+    },
 ];
 
 const footerNavItems: NavItem[] = [
@@ -40,7 +50,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href="/dashboard" prefetch>
+                            <Link href="/admin/dashboard" prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>

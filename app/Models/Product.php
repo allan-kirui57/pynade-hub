@@ -14,7 +14,7 @@ class Product extends Model
     use HasFactory, SoftDeletes, HasTags, HasCategories;
 
     protected $fillable = [
-        'title',
+        'name',
         'slug',
         'description',
         'image',
