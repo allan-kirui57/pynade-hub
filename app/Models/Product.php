@@ -25,13 +25,19 @@ class Product extends Model
         'repo_url',
         'website_url',
         'stars_count',
+        'forks_count',
+        'watchers_count',
+        'last_synced_at',
         'is_featured',
     ];
 
     protected $casts = [
         'is_open_source' => 'boolean',
         'stars_count' => 'integer',
+        'forks_count' => 'integer',
+        'watchers_count' => 'integer',
         'is_featured' => 'boolean',
+        'last_synced_at' => 'datetime',
     ];
 
     public function user()

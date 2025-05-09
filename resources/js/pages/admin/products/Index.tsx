@@ -68,18 +68,25 @@ interface Pagination {
     total: number
 }
 
+// Update the component props and destructuring to match the Laravel/Inertia structure
 export default function ProductIndex({
-                                         products = [],
-                                         pagination,
+                                         products,
                                          categories = [],
+                                         filters = {},
                                      }: {
-    products: Product[]
-    pagination: Pagination
+    products: {
+        data: Product[]
+        current_page: number
+        last_page: number
+        per_page: number
+        total: number
+    }
     categories: { id: number; name: string }[]
+    filters: Record<string, any>
 }) {
-    const [searchTerm, setSearchTerm] = useState("")
-    const [categoryFilter, setCategoryFilter] = useState<string>("")
-    const [statusFilter, setStatusFilter] = useState<string>("")
+    const [searchTerm, setSearchTerm] = useState(filters.search || "")
+    const [categoryFilter, setCategoryFilter] = useState<string>(filters.category || "")
+    const [statusFilter, setStatusFilter] = useState<string>(filters.pricing_type || "")
     const [sortField, setSortField] = useState<string>("created_at")
     const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc")
 
@@ -87,18 +94,13 @@ export default function ProductIndex({
     const { get } = useForm({
         search: searchTerm,
         category: categoryFilter,
-        status: statusFilter,
+        pricing_type: statusFilter,
         sort_field: sortField,
         sort_direction: sortDirection,
-        page: 1,
+        page: products?.current_page || 1,
     })
 
-    const handleSearch = () => {
-        get("/admin/products", {
-            preserveState: true,
-        })
-    }
-
+    // Update the handleSort function to use the correct pagination property
     const handleSort = (field: string) => {
         const direction = field === sortField && sortDirection === "asc" ? "desc" : "asc"
         setSortField(field)
@@ -107,25 +109,33 @@ export default function ProductIndex({
             data: {
                 search: searchTerm,
                 category: categoryFilter,
-                status: statusFilter,
+                pricing_type: statusFilter,
                 sort_field: field,
                 sort_direction: direction,
-                page: pagination.current_page,
+                page: products?.current_page || 1,
             },
             preserveState: true,
         })
     }
 
+    // Update the goToPage function to use the correct route
     const goToPage = (page: number) => {
         get("/admin/products", {
             data: {
                 search: searchTerm,
                 category: categoryFilter,
-                status: statusFilter,
+                pricing_type: statusFilter,
                 sort_field: sortField,
                 sort_direction: sortDirection,
                 page,
             },
+            preserveState: true,
+        })
+    }
+
+    // Update the search handler to use the correct route
+    const handleSearch = () => {
+        get("/admin/products", {
             preserveState: true,
         })
     }
@@ -159,7 +169,7 @@ export default function ProductIndex({
                 <div className="flex items-center justify-between">
                     <h1 className="text-2xl font-bold">Products</h1>
                     <Button asChild>
-                        <Link href="/products/create" className="flex items-center gap-1">
+                        <Link href="/admin/products/create" className="flex items-center gap-1">
                             <Plus className="h-4 w-4" />
                             Add Product
                         </Link>
@@ -260,20 +270,20 @@ export default function ProductIndex({
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {products.length === 0 ? (
+                                    {!products?.data || products.data.length === 0 ? (
                                         <TableRow>
                                             <TableCell colSpan={7} className="h-24 text-center">
                                                 No products found.
                                             </TableCell>
                                         </TableRow>
                                     ) : (
-                                        products.map((product) => (
+                                        products.data.map((product) => (
                                             <TableRow key={product.id}>
                                                 <TableCell>
                                                     <div className="h-12 w-12 rounded-md border overflow-hidden">
-                                                        {product.image_url ? (
+                                                        {product.image ? (
                                                             <img
-                                                                src={product.image_url || "/placeholder.svg"}
+                                                                src={product.image || "/placeholder.svg"}
                                                                 alt={product.name}
                                                                 className="h-full w-full object-cover"
                                                             />
@@ -286,32 +296,30 @@ export default function ProductIndex({
                                                 </TableCell>
                                                 <TableCell>
                                                     <div className="font-medium">{product.name}</div>
-                                                    <div className="text-sm text-muted-foreground">SKU: {product.sku}</div>
+                                                    <div className="text-sm text-muted-foreground">Slug: {product.slug}</div>
                                                 </TableCell>
                                                 <TableCell>
-                                                    <div className="font-medium">{formatPrice(product.price)}</div>
-                                                    {product.sale_price && (
-                                                        <div className="text-sm text-green-600">Sale: {formatPrice(product.sale_price)}</div>
-                                                    )}
+                                                    <div className="font-medium">{product.pricing_type}</div>
                                                 </TableCell>
                                                 <TableCell>
                                                     <div className="flex items-center">
-                            <span className={`font-medium ${product.stock_quantity <= 5 ? "text-red-500" : ""}`}>
-                              {product.stock_quantity}
+                            <span className="font-medium">
+                              {product.is_open_source ? "Open Source" : "Closed Source"}
                             </span>
-                                                        {product.stock_quantity <= 5 && (
-                                                            <Badge variant="outline" className="ml-2 text-red-500 border-red-500">
-                                                                Low
-                                                            </Badge>
-                                                        )}
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
                                                     <Badge variant="outline" className="font-normal">
-                                                        {product.category_name}
+                                                        {product.primaryCategory?.name || "Uncategorized"}
                                                     </Badge>
                                                 </TableCell>
-                                                <TableCell>{getStatusBadge(product.status)}</TableCell>
+                                                <TableCell>
+                                                    {product.is_featured ? (
+                                                        <Badge className="bg-green-500">Featured</Badge>
+                                                    ) : (
+                                                        <Badge variant="outline">Standard</Badge>
+                                                    )}
+                                                </TableCell>
                                                 <TableCell>
                                                     <DropdownMenu>
                                                         <DropdownMenuTrigger asChild>
@@ -323,13 +331,13 @@ export default function ProductIndex({
                                                         <DropdownMenuContent align="end">
                                                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                                             <DropdownMenuItem asChild>
-                                                                <Link href={`/products/${product.id}`}>
+                                                                <Link href={`/admin/products/${product.id}`}>
                                                                     <Eye className="mr-2 h-4 w-4" />
                                                                     View
                                                                 </Link>
                                                             </DropdownMenuItem>
                                                             <DropdownMenuItem asChild>
-                                                                <Link href={`/products/${product.id}/edit`}>
+                                                                <Link href={`/admin/products/${product.id}/edit`}>
                                                                     <Edit className="mr-2 h-4 w-4" />
                                                                     Edit
                                                                 </Link>
@@ -354,22 +362,21 @@ export default function ProductIndex({
                         </div>
 
                         {/* Pagination */}
-                        {pagination && pagination.last_page > 1 && (
+                        {products && products.last_page > 1 && (
                             <div className="flex items-center justify-between mt-4">
                                 <div className="text-sm text-muted-foreground">
-                                    Showing <span className="font-medium">{(pagination.current_page - 1) * pagination.per_page + 1}</span>{" "}
-                                    to{" "}
+                                    Showing <span className="font-medium">{(products.current_page - 1) * products.per_page + 1}</span> to{" "}
                                     <span className="font-medium">
-                    {Math.min(pagination.current_page * pagination.per_page, pagination.total)}
+                    {Math.min(products.current_page * products.per_page, products.total)}
                   </span>{" "}
-                                    of <span className="font-medium">{pagination.total}</span> results
+                                    of <span className="font-medium">{products.total}</span> results
                                 </div>
                                 <div className="flex items-center space-x-2">
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        onClick={() => goToPage(pagination.current_page - 1)}
-                                        disabled={pagination.current_page === 1}
+                                        onClick={() => goToPage(products.current_page - 1)}
+                                        disabled={products.current_page === 1}
                                     >
                                         <ChevronLeft className="h-4 w-4" />
                                         Previous
@@ -377,8 +384,8 @@ export default function ProductIndex({
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        onClick={() => goToPage(pagination.current_page + 1)}
-                                        disabled={pagination.current_page === pagination.last_page}
+                                        onClick={() => goToPage(products.current_page + 1)}
+                                        disabled={products.current_page === products.last_page}
                                     >
                                         Next
                                         <ChevronRight className="h-4 w-4" />

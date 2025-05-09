@@ -1,7 +1,5 @@
 "use client"
 
-import { Badge } from "@/components/ui/badge"
-
 import type React from "react"
 
 import { useState, useRef, useEffect } from "react"
@@ -9,53 +7,52 @@ import { Head, useForm, Link } from "@inertiajs/react"
 import AppLayout from "@/layouts/app-layout"
 import type { BreadcrumbItem } from "@/types"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Loader2, DollarSign, PlusCircle, X, AlertCircle } from "lucide-react"
+import { Loader2, ImageIcon, Github, Globe, Star, AlertCircle, X, ArrowRight } from "lucide-react"
 import { Editor } from "@/components/editor"
-import { MultiSelect } from "@/components/ui/multi-select"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { cn } from "@/lib/utils"
+import { Badge } from "@/components/ui/badge"
 import axios from "axios"
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: "Products",
-        href: "/products",
+        href: "/admin/products",
     },
     {
         title: "Create",
-        href: "/products/create",
+        href: "/admin/products/create",
     },
 ]
 
-// Define types for categories and tags
+// Define types for categories
 interface Category {
     id: number
     name: string
 }
 
-interface Tag {
-    id: number
-    name: string
-}
+// Pricing type options
+const PRICING_TYPES = [
+    { value: "free", label: "Free" },
+    { value: "freemium", label: "Freemium" },
+    { value: "paid", label: "Paid" },
+    { value: "subscription", label: "Subscription" },
+    { value: "open_source", label: "Open Source" },
+]
 
-export default function ProductCreate(props: { categories?: Category[]; tags?: Tag[] }) {
-    // State for categories and tags
+export default function ProductCreate(props: { categories?: Category[] }) {
+    // State for categories
     const [categories, setCategories] = useState<Category[]>(props.categories || [])
-    const [tags, setTags] = useState<Tag[]>(props.tags || [])
     const [isLoadingCategories, setIsLoadingCategories] = useState(false)
-    const [isLoadingTags, setIsLoadingTags] = useState(false)
     const [categoryError, setCategoryError] = useState<string | null>(null)
-    const [tagError, setTagError] = useState<string | null>(null)
 
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const [productImages, setProductImages] = useState<string[]>([])
-    const [selectedTags, setSelectedTags] = useState<string[]>([])
+    const [previewImage, setPreviewImage] = useState<string | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
     // Form data state
@@ -63,40 +60,22 @@ export default function ProductCreate(props: { categories?: Category[]; tags?: T
         name: "",
         slug: "",
         description: "",
-        short_description: "",
-        price: "",
-        sale_price: "",
-        cost: "",
-        sku: "",
-        barcode: "",
-        stock_quantity: "0",
-        category_id: "",
-        tags: [] as string[],
-        weight: "",
-        dimensions: {
-            length: "",
-            width: "",
-            height: "",
-        },
+        image: null as File | null,
+        pricing_type: "free",
+        is_open_source: false,
+        repo_url: "",
+        website_url: "",
+        stars_count: 0,
         is_featured: false,
-        is_digital: false,
-        status: "draft",
-        images: [] as File[],
-        meta_title: "",
-        meta_description: "",
+        primary_category_id: "",
     })
 
-    // Fetch categories and tags from the server
+    // Fetch categories from the server if not provided
     useEffect(() => {
-        // Only fetch if not provided as props
         if (!props.categories || props.categories.length === 0) {
             fetchCategories()
         }
-
-        if (!props.tags || props.tags.length === 0) {
-            fetchTags()
-        }
-    }, [props.categories, props.tags])
+    }, [props.categories])
 
     // Fetch categories from the server
     const fetchCategories = async () => {
@@ -114,27 +93,6 @@ export default function ProductCreate(props: { categories?: Category[]; tags?: T
         }
     }
 
-    // Fetch tags from the server
-    const fetchTags = async () => {
-        setIsLoadingTags(true)
-        setTagError(null)
-
-        try {
-            const response = await axios.get("/admin/tags")
-            setTags(response.data)
-        } catch (error) {
-            console.error("Error fetching tags:", error)
-            setTagError("Failed to load tags. Please try again.")
-        } finally {
-            setIsLoadingTags(false)
-        }
-    }
-
-    // Sync the form data with the selectedTags state
-    useEffect(() => {
-        setData("tags", selectedTags)
-    }, [selectedTags, setData])
-
     const generateSlug = (name: string) => {
         return name
             .toLowerCase()
@@ -142,14 +100,6 @@ export default function ProductCreate(props: { categories?: Category[]; tags?: T
             .replace(/\s+/g, "-")
             .replace(/-+/g, "-")
             .trim()
-    }
-
-    const generateShortDescription = (content: string) => {
-        // Strip HTML tags to get plain text
-        const text = content.replace(/<[^>]*>/g, "")
-        // Get first 100 words
-        const words = text.split(/\s+/).filter(Boolean).slice(0, 30)
-        return words.join(" ") + (words.length >= 30 ? "..." : "")
     }
 
     const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -162,68 +112,26 @@ export default function ProductCreate(props: { categories?: Category[]; tags?: T
     }
 
     const handleDescriptionChange = (content: string) => {
-        setData((prev) => {
-            // Only auto-generate short description if it hasn't been manually edited
-            const shouldUpdateShortDesc =
-                !prev.short_description || prev.short_description === generateShortDescription(prev.description)
-
-            return {
-                ...prev,
-                description: content,
-                short_description: shouldUpdateShortDesc ? generateShortDescription(content) : prev.short_description,
-            }
-        })
+        setData("description", content)
     }
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const files = e.target.files
-        if (!files || files.length === 0) return
-
-        // Update the form data with the new images
-        const newImages = [...data.images]
-        const newImagePreviews = [...productImages]
-
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i]
-            newImages.push(file)
-
-            // Create preview URL
+        const file = e.target.files?.[0] || null
+        if (file) {
+            setData("image", file)
             const reader = new FileReader()
             reader.onload = (e) => {
-                newImagePreviews.push(e.target?.result as string)
-                setProductImages([...newImagePreviews])
+                setPreviewImage(e.target?.result as string)
             }
             reader.readAsDataURL(file)
         }
-
-        setData("images", newImages)
-
-        // Reset file input
-        if (fileInputRef.current) {
-            fileInputRef.current.value = ""
-        }
-    }
-
-    const removeImage = (index: number) => {
-        const newImages = [...data.images]
-        const newImagePreviews = [...productImages]
-
-        newImages.splice(index, 1)
-        newImagePreviews.splice(index, 1)
-
-        setData("images", newImages)
-        setProductImages(newImagePreviews)
-    }
-
-    const handleTagsChange = (selected: string[]) => {
-        setSelectedTags(selected)
     }
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
         setIsSubmitting(true)
 
-        post("/products", {
+        post("/admin/products", {
             onSuccess: () => {
                 setIsSubmitting(false)
                 // Handle success - redirect is typically handled by Inertia
@@ -236,12 +144,8 @@ export default function ProductCreate(props: { categories?: Category[]; tags?: T
     }
 
     // Function to retry loading if there was an error
-    const retryLoading = (type: "categories" | "tags") => {
-        if (type === "categories") {
-            fetchCategories()
-        } else {
-            fetchTags()
-        }
+    const retryLoading = () => {
+        fetchCategories()
     }
 
     return (
@@ -249,14 +153,14 @@ export default function ProductCreate(props: { categories?: Category[]; tags?: T
             <Head title="Create Product" />
             <div className="flex flex-1 flex-col gap-4 p-4">
                 <div className="flex items-center justify-between">
-                    <h1 className="text-2xl font-bold">Create New Product</h1>
+                    <h1 className="text-2xl font-bold">Add New Product</h1>
                     <div className="flex gap-2">
                         <Button variant="outline" asChild>
-                            <Link href="/products">Cancel</Link>
+                            <Link href="/admin/products">Cancel</Link>
                         </Button>
                         <Button onClick={handleSubmit} disabled={processing || isSubmitting} className="gap-2">
                             {(processing || isSubmitting) && <Loader2 className="h-4 w-4 animate-spin" />}
-                            {processing || isSubmitting ? "Creating..." : "Save Product"}
+                            {processing || isSubmitting ? "Creating..." : "Publish Product"}
                         </Button>
                     </div>
                 </div>
@@ -267,6 +171,9 @@ export default function ProductCreate(props: { categories?: Category[]; tags?: T
                         <Card>
                             <CardHeader>
                                 <CardTitle>Basic Information</CardTitle>
+                                <CardDescription>
+                                    Enter the core details about the product you're adding to the directory.
+                                </CardDescription>
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-4">
@@ -284,7 +191,26 @@ export default function ProductCreate(props: { categories?: Category[]; tags?: T
                                             onChange={(e) => setData("slug", e.target.value)}
                                             placeholder="product-url-slug"
                                         />
+                                        <p className="text-xs text-muted-foreground">
+                                            This will be used in the URL: yourdomain.com/products/
+                                            <span className="font-mono">{data.slug || "product-slug"}</span>
+                                        </p>
                                         {errors.slug && <p className="text-sm text-destructive">{errors.slug}</p>}
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="website_url">Product Website</Label>
+                                        <div className="flex items-center space-x-2">
+                                            <Globe className="h-4 w-4 text-muted-foreground" />
+                                            <Input
+                                                id="website_url"
+                                                value={data.website_url}
+                                                onChange={(e) => setData("website_url", e.target.value)}
+                                                placeholder="https://example.com"
+                                                type="url"
+                                            />
+                                        </div>
+                                        {errors.website_url && <p className="text-sm text-destructive">{errors.website_url}</p>}
                                     </div>
 
                                     <Tabs defaultValue="write" className="w-full">
@@ -309,278 +235,68 @@ export default function ProductCreate(props: { categories?: Category[]; tags?: T
                                             </div>
                                         </TabsContent>
                                     </Tabs>
-
-                                    <div className="space-y-2 mt-4">
-                                        <Label htmlFor="short_description">Short Description</Label>
-                                        <Textarea
-                                            id="short_description"
-                                            value={data.short_description}
-                                            onChange={(e) => setData("short_description", e.target.value)}
-                                            placeholder="Brief summary of your product (shown in listings)"
-                                            rows={3}
-                                        />
-                                        <p className="text-xs text-muted-foreground">
-                                            Auto-generated from your description. Edit if you want a custom summary.
-                                        </p>
-                                        {errors.short_description && <p className="text-sm text-destructive">{errors.short_description}</p>}
-                                    </div>
                                 </div>
                             </CardContent>
                         </Card>
 
                         <Card>
                             <CardHeader>
-                                <CardTitle>Pricing</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="price">Regular Price</Label>
-                                        <div className="relative">
-                                            <DollarSign className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                                            <Input
-                                                id="price"
-                                                type="number"
-                                                min="0"
-                                                step="0.01"
-                                                className="pl-8"
-                                                value={data.price}
-                                                onChange={(e) => setData("price", e.target.value)}
-                                                placeholder="0.00"
-                                            />
-                                        </div>
-                                        {errors.price && <p className="text-sm text-destructive">{errors.price}</p>}
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label htmlFor="sale_price">Sale Price (Optional)</Label>
-                                        <div className="relative">
-                                            <DollarSign className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                                            <Input
-                                                id="sale_price"
-                                                type="number"
-                                                min="0"
-                                                step="0.01"
-                                                className="pl-8"
-                                                value={data.sale_price}
-                                                onChange={(e) => setData("sale_price", e.target.value)}
-                                                placeholder="0.00"
-                                            />
-                                        </div>
-                                        {errors.sale_price && <p className="text-sm text-destructive">{errors.sale_price}</p>}
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label htmlFor="cost">Cost (Optional)</Label>
-                                        <div className="relative">
-                                            <DollarSign className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                                            <Input
-                                                id="cost"
-                                                type="number"
-                                                min="0"
-                                                step="0.01"
-                                                className="pl-8"
-                                                value={data.cost}
-                                                onChange={(e) => setData("cost", e.target.value)}
-                                                placeholder="0.00"
-                                            />
-                                        </div>
-                                        {errors.cost && <p className="text-sm text-destructive">{errors.cost}</p>}
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Inventory</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="sku">SKU (Stock Keeping Unit)</Label>
-                                        <Input
-                                            id="sku"
-                                            value={data.sku}
-                                            onChange={(e) => setData("sku", e.target.value)}
-                                            placeholder="SKU123"
-                                        />
-                                        {errors.sku && <p className="text-sm text-destructive">{errors.sku}</p>}
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label htmlFor="barcode">Barcode (ISBN, UPC, GTIN, etc.)</Label>
-                                        <Input
-                                            id="barcode"
-                                            value={data.barcode}
-                                            onChange={(e) => setData("barcode", e.target.value)}
-                                            placeholder="123456789012"
-                                        />
-                                        {errors.barcode && <p className="text-sm text-destructive">{errors.barcode}</p>}
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label htmlFor="stock_quantity">Stock Quantity</Label>
-                                        <Input
-                                            id="stock_quantity"
-                                            type="number"
-                                            min="0"
-                                            step="1"
-                                            value={data.stock_quantity}
-                                            onChange={(e) => setData("stock_quantity", e.target.value)}
-                                            placeholder="0"
-                                        />
-                                        {errors.stock_quantity && <p className="text-sm text-destructive">{errors.stock_quantity}</p>}
-                                    </div>
-
-                                    <div className="flex items-center space-x-2 pt-8">
-                                        <Switch
-                                            id="is_digital"
-                                            checked={data.is_digital}
-                                            onCheckedChange={(checked) => setData("is_digital", checked)}
-                                        />
-                                        <Label htmlFor="is_digital">This is a digital product</Label>
-                                        {errors.is_digital && <p className="text-sm text-destructive">{errors.is_digital}</p>}
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Shipping</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="weight">Weight (kg)</Label>
-                                        <Input
-                                            id="weight"
-                                            type="number"
-                                            min="0"
-                                            step="0.01"
-                                            value={data.weight}
-                                            onChange={(e) => setData("weight", e.target.value)}
-                                            placeholder="0.00"
-                                        />
-                                        {errors.weight && <p className="text-sm text-destructive">{errors.weight}</p>}
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label htmlFor="length">Length (cm)</Label>
-                                        <Input
-                                            id="length"
-                                            type="number"
-                                            min="0"
-                                            step="0.1"
-                                            value={data.dimensions.length}
-                                            onChange={(e) => setData("dimensions", { ...data.dimensions, length: e.target.value })}
-                                            placeholder="0.0"
-                                        />
-                                        {errors["dimensions.length"] && (
-                                            <p className="text-sm text-destructive">{errors["dimensions.length"]}</p>
-                                        )}
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label htmlFor="width">Width (cm)</Label>
-                                        <Input
-                                            id="width"
-                                            type="number"
-                                            min="0"
-                                            step="0.1"
-                                            value={data.dimensions.width}
-                                            onChange={(e) => setData("dimensions", { ...data.dimensions, width: e.target.value })}
-                                            placeholder="0.0"
-                                        />
-                                        {errors["dimensions.width"] && (
-                                            <p className="text-sm text-destructive">{errors["dimensions.width"]}</p>
-                                        )}
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label htmlFor="height">Height (cm)</Label>
-                                        <Input
-                                            id="height"
-                                            type="number"
-                                            min="0"
-                                            step="0.1"
-                                            value={data.dimensions.height}
-                                            onChange={(e) => setData("dimensions", { ...data.dimensions, height: e.target.value })}
-                                            placeholder="0.0"
-                                        />
-                                        {errors["dimensions.height"] && (
-                                            <p className="text-sm text-destructive">{errors["dimensions.height"]}</p>
-                                        )}
-                                    </div>
-                                </div>
-                                <div className="flex items-center mt-4 pt-2 border-t">
-                                    <AlertCircle className="h-4 w-4 text-muted-foreground mr-2" />
-                                    <p className="text-xs text-muted-foreground">
-                                        Leave the dimensions empty if they don't apply to this product.
-                                    </p>
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Images</CardTitle>
+                                <CardTitle>Product Image</CardTitle>
+                                <CardDescription>
+                                    Upload a high-quality image that represents your product. This will be displayed in listings and on
+                                    the product page.
+                                </CardDescription>
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-4">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                        {/* Image thumbnails */}
-                                        {productImages.map((image, index) => (
-                                            <div key={index} className="relative border rounded-md overflow-hidden group">
+                                    <div
+                                        className={cn(
+                                            "border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:bg-muted/50 transition-colors",
+                                            previewImage ? "border-muted" : "border-muted-foreground/25",
+                                        )}
+                                        onClick={() => fileInputRef.current?.click()}
+                                    >
+                                        {previewImage ? (
+                                            <div className="relative aspect-video w-full overflow-hidden rounded-md">
                                                 <img
-                                                    src={image || "/placeholder.svg"}
-                                                    alt={`Product image ${index + 1}`}
-                                                    className="object-cover w-full h-32"
+                                                    src={previewImage || "/placeholder.svg"}
+                                                    alt="Product image preview"
+                                                    className="object-cover w-full h-full"
                                                 />
-                                                <Button
-                                                    variant="destructive"
-                                                    size="sm"
-                                                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                    onClick={() => removeImage(index)}
-                                                >
-                                                    <X className="h-4 w-4" />
-                                                </Button>
-                                                {index === 0 && <Badge className="absolute top-2 left-2 bg-primary">Main</Badge>}
                                             </div>
-                                        ))}
-
-                                        {/* Upload button */}
-                                        <div
-                                            className="border-2 border-dashed rounded-md p-4 flex flex-col items-center justify-center cursor-pointer hover:bg-muted/50 transition-colors h-32"
-                                            onClick={() => fileInputRef.current?.click()}
+                                        ) : (
+                                            <div className="py-12 flex flex-col items-center justify-center text-muted-foreground">
+                                                <ImageIcon className="h-12 w-12 mb-2" />
+                                                <p className="text-sm">Click to upload a product image</p>
+                                                <p className="text-xs mt-1">Recommended size: 1200 x 630px</p>
+                                            </div>
+                                        )}
+                                        <input
+                                            ref={fileInputRef}
+                                            type="file"
+                                            accept="image/*"
+                                            className="hidden"
+                                            onChange={handleImageChange}
+                                        />
+                                    </div>
+                                    {errors.image && <p className="text-sm text-destructive">{errors.image}</p>}
+                                    {previewImage && (
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                setPreviewImage(null)
+                                                setData("image", null)
+                                                if (fileInputRef.current) {
+                                                    fileInputRef.current.value = ""
+                                                }
+                                            }}
                                         >
-                                            <PlusCircle className="h-8 w-8 text-muted-foreground mb-2" />
-                                            <p className="text-sm text-muted-foreground">Add Image</p>
-                                            <input
-                                                ref={fileInputRef}
-                                                type="file"
-                                                accept="image/*"
-                                                multiple
-                                                className="hidden"
-                                                onChange={handleImageChange}
-                                            />
-                                        </div>
-                                    </div>
-
-                                    {errors.images && <p className="text-sm text-destructive">{errors.images}</p>}
-
-                                    <div className="text-xs text-muted-foreground mt-2">
-                                        <p>
-                                            💡 <strong>Tips:</strong>
-                                        </p>
-                                        <ul className="list-disc pl-5 space-y-1">
-                                            <li>The first image will be the main product image</li>
-                                            <li>Use high-quality images with aspect ratio 1:1</li>
-                                            <li>Recommended size: 1000 x 1000 pixels</li>
-                                            <li>Maximum 8 images per product</li>
-                                        </ul>
-                                    </div>
+                                            <X className="h-4 w-4 mr-2" />
+                                            Remove Image
+                                        </Button>
+                                    )}
                                 </div>
                             </CardContent>
                         </Card>
@@ -590,44 +306,11 @@ export default function ProductCreate(props: { categories?: Category[]; tags?: T
                     <div className="space-y-4">
                         <Card>
                             <CardHeader>
-                                <CardTitle>Product Status</CardTitle>
+                                <CardTitle>Publishing Options</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="status">Status</Label>
-                                    <Select value={data.status} onValueChange={(value) => setData("status", value)}>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select status" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="draft">Draft</SelectItem>
-                                            <SelectItem value="active">Active</SelectItem>
-                                            <SelectItem value="archived">Archived</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    {errors.status && <p className="text-sm text-destructive">{errors.status}</p>}
-                                    <p className="text-xs text-muted-foreground">Only "Active" products are visible to customers.</p>
-                                </div>
-
-                                <div className="flex items-center space-x-2 pt-2">
-                                    <Switch
-                                        id="is_featured"
-                                        checked={data.is_featured}
-                                        onCheckedChange={(checked) => setData("is_featured", checked)}
-                                    />
-                                    <Label htmlFor="is_featured">Featured Product</Label>
-                                    {errors.is_featured && <p className="text-sm text-destructive">{errors.is_featured}</p>}
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Organization</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="category">Category</Label>
+                                    <Label htmlFor="primary_category_id">Category</Label>
                                     {isLoadingCategories ? (
                                         <div className="flex items-center space-x-2 text-sm text-muted-foreground py-2">
                                             <Loader2 className="h-4 w-4 animate-spin" />
@@ -636,14 +319,14 @@ export default function ProductCreate(props: { categories?: Category[]; tags?: T
                                     ) : categoryError ? (
                                         <div className="space-y-2">
                                             <p className="text-sm text-destructive">{categoryError}</p>
-                                            <Button variant="outline" size="sm" onClick={() => retryLoading("categories")}>
+                                            <Button variant="outline" size="sm" onClick={retryLoading}>
                                                 Retry
                                             </Button>
                                         </div>
                                     ) : (
                                         <Select
-                                            value={data.category_id ? data.category_id.toString() : ""}
-                                            onValueChange={(value) => setData("category_id", value)}
+                                            value={data.primary_category_id ? data.primary_category_id.toString() : ""}
+                                            onValueChange={(value) => setData("primary_category_id", value)}
                                         >
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Select a category" />
@@ -657,87 +340,161 @@ export default function ProductCreate(props: { categories?: Category[]; tags?: T
                                             </SelectContent>
                                         </Select>
                                     )}
-                                    {errors.category_id && <p className="text-sm text-destructive">{errors.category_id}</p>}
+                                    {errors.primary_category_id && (
+                                        <p className="text-sm text-destructive">{errors.primary_category_id}</p>
+                                    )}
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="tags">Tags</Label>
-                                    {isLoadingTags ? (
-                                        <div className="flex items-center space-x-2 text-sm text-muted-foreground py-2">
-                                            <Loader2 className="h-4 w-4 animate-spin" />
-                                            <span>Loading tags...</span>
-                                        </div>
-                                    ) : tagError ? (
-                                        <div className="space-y-2">
-                                            <p className="text-sm text-destructive">{tagError}</p>
-                                            <Button variant="outline" size="sm" onClick={() => retryLoading("tags")}>
-                                                Retry
-                                            </Button>
-                                        </div>
-                                    ) : (
-                                        <MultiSelect
-                                            options={tags.map((tag) => ({ label: tag.name, value: tag.id.toString() }))}
-                                            selected={selectedTags}
-                                            onChange={handleTagsChange}
-                                            placeholder="Select tags"
+                                    <Label htmlFor="pricing_type">Pricing Type</Label>
+                                    <Select value={data.pricing_type} onValueChange={(value) => setData("pricing_type", value)}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select pricing type" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {PRICING_TYPES.map((type) => (
+                                                <SelectItem key={type.value} value={type.value}>
+                                                    {type.label}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    {errors.pricing_type && <p className="text-sm text-destructive">{errors.pricing_type}</p>}
+                                </div>
+
+                                <div className="flex items-center space-x-2">
+                                    <Switch
+                                        id="is_featured"
+                                        checked={data.is_featured}
+                                        onCheckedChange={(checked) => setData("is_featured", checked)}
+                                    />
+                                    <Label htmlFor="is_featured">Featured Product</Label>
+                                    {errors.is_featured && <p className="text-sm text-destructive">{errors.is_featured}</p>}
+                                </div>
+                            </CardContent>
+                            <CardFooter className="flex flex-col items-start border-t px-6 py-4">
+                                <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                                    <AlertCircle className="h-4 w-4" />
+                                    <p>Only featured products will appear on the homepage.</p>
+                                </div>
+                            </CardFooter>
+                        </Card>
+
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Repository Information</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="repo_url">Repository URL</Label>
+                                    <div className="flex items-center space-x-2">
+                                        <Github className="h-4 w-4 text-muted-foreground" />
+                                        <Input
+                                            id="repo_url"
+                                            value={data.repo_url}
+                                            onChange={(e) => setData("repo_url", e.target.value)}
+                                            placeholder="https://github.com/username/repo"
                                         />
-                                    )}
-                                    {errors.tags && <p className="text-sm text-destructive">{errors.tags}</p>}
+                                    </div>
+                                    {errors.repo_url && <p className="text-sm text-destructive">{errors.repo_url}</p>}
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="stars_count">GitHub Stars</Label>
+                                    <div className="flex items-center space-x-2">
+                                        <Star className="h-4 w-4 text-muted-foreground" />
+                                        <Input
+                                            id="stars_count"
+                                            type="number"
+                                            min="0"
+                                            value={data.stars_count}
+                                            onChange={(e) => setData("stars_count", Number.parseInt(e.target.value) || 0)}
+                                            placeholder="0"
+                                        />
+                                    </div>
+                                    {errors.stars_count && <p className="text-sm text-destructive">{errors.stars_count}</p>}
                                 </div>
                             </CardContent>
                         </Card>
 
                         <Card>
                             <CardHeader>
-                                <CardTitle>SEO</CardTitle>
+                                <CardTitle>Preview</CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <Accordion type="single" collapsible defaultValue="seo">
-                                    <AccordionItem value="seo">
-                                        <AccordionTrigger>Search Engine Optimization</AccordionTrigger>
-                                        <AccordionContent className="space-y-4 pt-2">
-                                            <div className="space-y-2">
-                                                <Label htmlFor="meta_title">Meta Title</Label>
-                                                <Input
-                                                    id="meta_title"
-                                                    value={data.meta_title}
-                                                    onChange={(e) => setData("meta_title", e.target.value)}
-                                                    placeholder={data.name || "Product title"}
-                                                />
-                                                <p className="text-xs text-muted-foreground">Leave blank to use product name</p>
-                                            </div>
-
-                                            <div className="space-y-2">
-                                                <Label htmlFor="meta_description">Meta Description</Label>
-                                                <Textarea
-                                                    id="meta_description"
-                                                    value={data.meta_description}
-                                                    onChange={(e) => setData("meta_description", e.target.value)}
-                                                    placeholder={data.short_description || "Brief description for search results"}
-                                                    rows={3}
-                                                />
-                                                <p className="text-xs text-muted-foreground">Leave blank to use short description</p>
-                                            </div>
-
-                                            <div className="border rounded p-3 bg-muted/50">
-                                                <h3 className="text-sm font-medium mb-1">Google Search Preview</h3>
-                                                <div className="space-y-1">
-                                                    <p className="text-blue-600 text-sm font-medium truncate">
-                                                        {data.meta_title || data.name || "Product Title"}
-                                                    </p>
-                                                    <p className="text-green-700 text-xs">
-                                                        yourdomain.com/products/{data.slug || "product-slug"}
-                                                    </p>
-                                                    <p className="text-xs text-gray-600 line-clamp-2">
-                                                        {data.meta_description ||
-                                                            data.short_description ||
-                                                            "Product description will appear here..."}
-                                                    </p>
+                                <div className="space-y-4 border rounded-md p-4">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center space-x-2">
+                                            {previewImage ? (
+                                                <div className="h-10 w-10 rounded-md overflow-hidden">
+                                                    <img src={previewImage || "/placeholder.svg"} alt="" className="h-full w-full object-cover" />
                                                 </div>
+                                            ) : (
+                                                <div className="h-10 w-10 rounded-md bg-muted flex items-center justify-center">
+                                                    <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                                                </div>
+                                            )}
+                                            <div>
+                                                <h3 className="font-medium">{data.name || "Product Name"}</h3>
+                                                <p className="text-xs text-muted-foreground">
+                                                    {categories.find((c) => c.id.toString() === data.primary_category_id)?.name || "Category"}
+                                                </p>
                                             </div>
-                                        </AccordionContent>
-                                    </AccordionItem>
-                                </Accordion>
+                                        </div>
+                                        {data.is_featured && <Badge>Featured</Badge>}
+                                    </div>
+
+                                    <div className="text-sm">
+                                        <p className="line-clamp-2 text-muted-foreground">
+                                            {data.description ? (
+                                                <span
+                                                    dangerouslySetInnerHTML={{
+                                                        __html: data.description.replace(/<[^>]*>/g, " ").substring(0, 100) + "...",
+                                                    }}
+                                                />
+                                            ) : (
+                                                "Product description will appear here..."
+                                            )}
+                                        </p>
+                                    </div>
+
+                                    <div className="flex items-center justify-between text-sm">
+                                        <div className="flex items-center space-x-2">
+                                            <Badge variant="outline" className="font-normal">
+                                                {PRICING_TYPES.find((t) => t.value === data.pricing_type)?.label || "Free"}
+                                            </Badge>
+                                            {data.repo_url && (
+                                                <Badge variant="outline" className="font-normal">
+                                                    Open Source
+                                                </Badge>
+                                            )}
+                                        </div>
+                                        <Button variant="ghost" size="sm" className="gap-1">
+                                            View <ArrowRight className="h-3 w-3" />
+                                        </Button>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Need Help?</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-sm text-muted-foreground space-y-4">
+                                    <p>Here are some tips for creating a great product listing:</p>
+                                    <ul className="list-disc pl-5 space-y-1">
+                                        <li>Use a clear, descriptive name</li>
+                                        <li>Provide a detailed description of features and benefits</li>
+                                        <li>Upload a high-quality image</li>
+                                        <li>Select the most relevant category</li>
+                                        <li>Include the correct pricing model</li>
+                                    </ul>
+                                    <Button variant="outline" className="w-full mt-2">
+                                        View Submission Guidelines
+                                    </Button>
+                                </div>
                             </CardContent>
                         </Card>
                     </div>
