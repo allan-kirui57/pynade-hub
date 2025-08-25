@@ -64,9 +64,12 @@ class BlogController extends Controller
 
         try {
             DB::beginTransaction();
+
             $data = $request->validated();
             $data['user_id'] = Auth::id();
+
             $blog = Blog::create($data);
+
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();

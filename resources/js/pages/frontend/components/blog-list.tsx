@@ -61,12 +61,12 @@ export default function BlogList({ blogs }: BlogListProps) {
                         <div className="flex flex-col md:col-span-2">
                             <CardHeader>
                                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                    <Link
-                                        href={route('blogs.category', blog.category.slug)}
-                                        className="hover:text-foreground"
-                                    >
-                                        <Badge variant="secondary">{blog.category.name}</Badge>
-                                    </Link>
+                                    {/*<Link*/}
+                                    {/*    href={route('blogs.category', blog.category.id)}*/}
+                                    {/*    className="hover:text-foreground"*/}
+                                    {/*>*/}
+                                        <Badge variant="secondary">{blog.category?.name}</Badge>
+                                    {/*</Link>*/}
                                     <div className="flex items-center gap-1">
                                         <Calendar className="h-3.5 w-3.5" />
                                         <span>{blog.published_at}</span>
@@ -81,7 +81,7 @@ export default function BlogList({ blogs }: BlogListProps) {
                                     </div>
                                 </div>
                                 <CardTitle className="mt-2 line-clamp-2 hover:text-primary">
-                                    <Link href={route('blogs.show', blog.slug)}>{blog.title}</Link>
+                                    <Link href={route('frontend.blogs.show', blog.slug)}>{blog.title}</Link>
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="flex-grow">
@@ -102,11 +102,11 @@ export default function BlogList({ blogs }: BlogListProps) {
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <img
-                                        src={blog.author.avatar || '/placeholder.svg?height=32&width=32'}
-                                        alt={blog.author.name}
+                                        src={blog.author?.avatar || '/placeholder.svg?height=32&width=32'}
+                                        alt={blog.author?.name}
                                         className="h-6 w-6 rounded-full object-cover"
                                     />
-                                    <span className="text-sm text-muted-foreground">{blog.author.name}</span>
+                                    <span className="text-sm text-muted-foreground">{blog.author?.name}</span>
                                 </div>
                             </CardFooter>
                         </div>

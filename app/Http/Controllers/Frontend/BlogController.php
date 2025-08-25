@@ -29,7 +29,7 @@ class BlogController extends Controller
         $categories = $this->contentService->getCategoriesWithCounts('blog');
         $popularTags = $this->contentService->getPopularTags('blog');
 
-        return Inertia::render('frontend/blogs', [
+        return Inertia::render('frontend/blogs/index', [
             'blogs' => $blogs,
             'categories' => $categories,
             'popularTags' => $popularTags,
@@ -40,8 +40,8 @@ class BlogController extends Controller
     public function show(Blog $blog)
     {
         $blog->load([
-            'user:id,name,avatar,bio',
-            'categories:id,name,slug',
+            'author:id,name,avatar,bio',
+            'category:id,name,slug',
             'tags:id,name,slug',
             'comments' => function ($query) {
                 $query->with('user:id,name,avatar')
@@ -63,13 +63,18 @@ class BlogController extends Controller
                         $q->whereIn('tags.id', $blog->tags->pluck('id'));
                     });
             })
-            ->with('user:id,name', 'primaryCategory:id,name')
+            ->with('author:id,name', 'category:id,name')
             ->latest('published_at')
             ->take(3)
             ->get();
 
-        return Inertia::render('Public/Blogs/Show', [
+        $categories = $this->contentService->getCategoriesWithCounts('blog');
+        $popularTags = $this->contentService->getPopularTags('blog');
+
+        return Inertia::render('frontend/blogs/show', [
             'blog' => $blog,
+            'categories' => $categories,
+            'popularTags' => $popularTags,
             'relatedBlogs' => $relatedBlogs,
         ]);
     }

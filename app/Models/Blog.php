@@ -31,11 +31,15 @@ class Blog extends Model
         'is_featured' => 'boolean',
     ];
 
-    public function user()
+    public function author()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
+    public function category()
+    {
+        return $this->belongsTo(Category::class, 'primary_category_id');
+    }
     public function comments()
     {
         return $this->morphMany(Comment::class, 'commentable');

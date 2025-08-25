@@ -19,8 +19,8 @@ class ContentService
     public function getPaginatedBlogs(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
         $query = Blog::with([
-            'user:id,name,avatar',
-            'primaryCategory:id,name,slug',
+            'author:id,name,avatar',
+            'category:id,name,slug',
             'tags:id,name,slug',
             'comments' => function ($query) {
                 $query->count();
