@@ -25,7 +25,6 @@ return new class extends Migration
             $table->unsignedInteger('forks_count')->default(0);
             $table->unsignedInteger('watchers_count')->default(0);
             $table->timestamp('last_synced_at')->nullable();
-            $table->foreignId('category_id')->nullable()->constrained('categories')->nullOnDelete();
             $table->boolean('is_featured')->default(false);
             $table->timestamps();
             $table->softDeletes();
