@@ -12,15 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { X } from 'lucide-react';
 
-interface Category {
-    id: number;
-    name: string;
-    slug: string;
-    count: number;
-}
-
 interface ProductFiltersProps {
-    categories: Category[];
     selectedCategory?: string;
     selectedPricing?: string;
     selectedSort?: string;
@@ -28,7 +20,6 @@ interface ProductFiltersProps {
 }
 
 export default function ProductFilters({
-                                           categories,
                                            selectedCategory,
                                            selectedPricing,
                                            selectedSort,
@@ -77,17 +68,6 @@ export default function ProductFilters({
     const getActiveFilters = () => {
         const filters = [];
 
-        if (selectedCategory) {
-            const category = categories.find(c => c.slug === selectedCategory);
-            if (category) {
-                filters.push({
-                    type: 'category',
-                    label: category.name,
-                    value: selectedCategory,
-                });
-            }
-        }
-
         if (selectedPricing && selectedPricing !== 'all') {
             filters.push({
                 type: 'pricing',
@@ -109,44 +89,6 @@ export default function ProductFilters({
 
     return (
         <div className="space-y-4">
-            <div className="flex flex-wrap items-center gap-4">
-                <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-sm font-medium">Categories:</span>
-                    <div className="flex flex-wrap gap-2">
-                        <Link
-                            href={route('products.index')}
-                            className={`inline-flex h-8 items-center rounded-md px-3 text-xs font-medium ${
-                                !selectedCategory
-                                    ? 'bg-primary text-primary-foreground'
-                                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                            }`}
-                        >
-                            All
-                        </Link>
-                        {categories.slice(0, 8).map((category) => (
-                            <Link
-                                key={category.id}
-                                href={route('products.category', category.slug)}
-                                className={`inline-flex h-8 items-center rounded-md px-3 text-xs font-medium ${
-                                    selectedCategory === category.slug
-                                        ? 'bg-primary text-primary-foreground'
-                                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                                }`}
-                            >
-                                {category.name}
-                            </Link>
-                        ))}
-                        {categories.length > 8 && (
-                            <Link
-                                href={route('products.categories')}
-                                className="inline-flex h-8 items-center rounded-md bg-muted px-3 text-xs font-medium text-muted-foreground hover:bg-muted/80"
-                            >
-                                More...
-                            </Link>
-                        )}
-                    </div>
-                </div>
-            </div>
 
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex flex-wrap items-center gap-2">

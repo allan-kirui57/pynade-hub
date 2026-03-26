@@ -12,11 +12,6 @@ interface Product {
     slug: string;
     description: string;
     image: string;
-    category: {
-        id: number;
-        name: string;
-        slug: string;
-    };
     pricing: "Free" | "Freemium" | "Paid";
     stars?: number;
     language?: string;
@@ -83,9 +78,6 @@ export default function ProductSidebar({
                             <ThumbsUp className="h-3 w-3" />
                             <span>{product.upvotes}</span>
                         </div>
-                        <Badge variant="secondary" className="text-xs">
-                            {product.category.name}
-                        </Badge>
                     </div>
                 </div>
             </div>

@@ -12,11 +12,6 @@ interface Product {
     slug: string;
     description: string;
     image: string;
-    category: {
-        id: number;
-        name: string;
-        slug: string;
-    };
     pricing: "Free" | "Freemium" | "Paid";
     stars?: number;
     language?: string;
@@ -70,9 +65,7 @@ export default function ProductList({ products }: ProductListProps) {
                     </div>
                     <CardHeader>
                         <div className="flex items-center justify-between">
-                            <Link href={route('products.category', product.category.slug)}>
-                                <Badge variant="secondary">{product.category.name}</Badge>
-                            </Link>
+
                             <div className="flex items-center gap-2">
                                 {product.isOpenSource && product.stars && (
                                     <div className="flex items-center gap-1 text-sm text-muted-foreground">

@@ -30,37 +30,13 @@ interface Blog {
 }
 
 interface BlogSidebarProps {
-    categories: Category[];
     tags: Tag[];
     popularBlogs: Blog[];
 }
 
-export default function BlogSidebar({ categories, tags, popularBlogs }: BlogSidebarProps) {
+export default function BlogSidebar({ tags, popularBlogs }: BlogSidebarProps) {
     return (
         <div className="space-y-6">
-            {/* Categories Section */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Top Categories</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-2">
-                        {categories.map((category) => (
-                            <div key={category.id} className="flex items-center justify-between">
-                                <Link
-                                    href={route('blogs.category', category.slug)}
-                                    className="text-sm hover:text-primary"
-                                >
-                                    {category.name}
-                                </Link>
-                                <Badge variant="secondary" className="text-xs">
-                                    {category.count}
-                                </Badge>
-                            </div>
-                        ))}
-                    </div>
-                </CardContent>
-            </Card>
 
             {/* Popular Posts Section */}
             <Card>

@@ -1,8 +1,4 @@
-"use client"
-
-import type React from "react"
-
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef } from "react"
 import { Head, useForm, Link } from "@inertiajs/react"
 import AppLayout from "@/layouts/app-layout"
 import type { BreadcrumbItem } from "@/types"
@@ -17,7 +13,6 @@ import { Loader2, ImageIcon, Github, Globe, Star, AlertCircle, X, ArrowRight } f
 import { Editor } from "@/components/editor"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
-import axios from "axios"
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -30,12 +25,6 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ]
 
-// Define types for categories
-interface Category {
-    id: number
-    name: string
-}
-
 // Pricing type options
 const PRICING_TYPES = [
     { value: "free", label: "Free" },
@@ -45,12 +34,7 @@ const PRICING_TYPES = [
     { value: "open_source", label: "Open Source" },
 ]
 
-export default function ProductCreate(props: { categories?: Category[] }) {
-    // State for categories
-    const [categories, setCategories] = useState<Category[]>(props.categories || [])
-    const [isLoadingCategories, setIsLoadingCategories] = useState(false)
-    const [categoryError, setCategoryError] = useState<string | null>(null)
-
+export default function ProductCreate() {
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [previewImage, setPreviewImage] = useState<string | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
@@ -67,31 +51,7 @@ export default function ProductCreate(props: { categories?: Category[] }) {
         website_url: "",
         stars_count: 0,
         is_featured: false,
-        primary_category_id: "",
     })
-
-    // Fetch categories from the server if not provided
-    useEffect(() => {
-        if (!props.categories || props.categories.length === 0) {
-            fetchCategories()
-        }
-    }, [props.categories])
-
-    // Fetch categories from the server
-    const fetchCategories = async () => {
-        setIsLoadingCategories(true)
-        setCategoryError(null)
-
-        try {
-            const response = await axios.get("/admin/categories")
-            setCategories(response.data)
-        } catch (error) {
-            console.error("Error fetching categories:", error)
-            setCategoryError("Failed to load categories. Please try again.")
-        } finally {
-            setIsLoadingCategories(false)
-        }
-    }
 
     const generateSlug = (name: string) => {
         return name
@@ -141,11 +101,6 @@ export default function ProductCreate(props: { categories?: Category[] }) {
             },
             forceFormData: true,
         })
-    }
-
-    // Function to retry loading if there was an error
-    const retryLoading = () => {
-        fetchCategories()
     }
 
     return (
@@ -309,41 +264,6 @@ export default function ProductCreate(props: { categories?: Category[] }) {
                                 <CardTitle>Publishing Options</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="primary_category_id">Category</Label>
-                                    {isLoadingCategories ? (
-                                        <div className="flex items-center space-x-2 text-sm text-muted-foreground py-2">
-                                            <Loader2 className="h-4 w-4 animate-spin" />
-                                            <span>Loading categories...</span>
-                                        </div>
-                                    ) : categoryError ? (
-                                        <div className="space-y-2">
-                                            <p className="text-sm text-destructive">{categoryError}</p>
-                                            <Button variant="outline" size="sm" onClick={retryLoading}>
-                                                Retry
-                                            </Button>
-                                        </div>
-                                    ) : (
-                                        <Select
-                                            value={data.primary_category_id ? data.primary_category_id.toString() : ""}
-                                            onValueChange={(value) => setData("primary_category_id", value)}
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select a category" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {categories.map((category) => (
-                                                    <SelectItem key={category.id} value={category.id.toString()}>
-                                                        {category.name}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    )}
-                                    {errors.primary_category_id && (
-                                        <p className="text-sm text-destructive">{errors.primary_category_id}</p>
-                                    )}
-                                </div>
 
                                 <div className="space-y-2">
                                     <Label htmlFor="pricing_type">Pricing Type</Label>
@@ -436,9 +356,6 @@ export default function ProductCreate(props: { categories?: Category[] }) {
                                             )}
                                             <div>
                                                 <h3 className="font-medium">{data.name || "Product Name"}</h3>
-                                                <p className="text-xs text-muted-foreground">
-                                                    {categories.find((c) => c.id.toString() === data.primary_category_id)?.name || "Category"}
-                                                </p>
                                             </div>
                                         </div>
                                         {data.is_featured && <Badge>Featured</Badge>}
@@ -488,7 +405,6 @@ export default function ProductCreate(props: { categories?: Category[] }) {
                                         <li>Use a clear, descriptive name</li>
                                         <li>Provide a detailed description of features and benefits</li>
                                         <li>Upload a high-quality image</li>
-                                        <li>Select the most relevant category</li>
                                         <li>Include the correct pricing model</li>
                                     </ul>
                                     <Button variant="outline" className="w-full mt-2">

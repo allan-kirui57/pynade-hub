@@ -4,14 +4,13 @@
 namespace App\Models;
 
 use App\Traits\HasTags;
-use App\Traits\HasCategories;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
 {
-    use HasFactory, SoftDeletes, HasTags, HasCategories;
+    use HasFactory, SoftDeletes, HasTags;
 
     protected $fillable = [
         'name',
@@ -19,7 +18,6 @@ class Product extends Model
         'description',
         'image',
         'user_id',
-        'primary_category_id',
         'pricing_type',
         'is_open_source',
         'repo_url',
@@ -56,8 +54,7 @@ class Product extends Model
     }
     public function relatedProducts()
     {
-        return $this->where('category_id', $this->category_id)
-            ->where('id', '!=', $this->id)
+        return $this->where('id', '!=', $this->id)
             ->take(3)
             ->get();
     }

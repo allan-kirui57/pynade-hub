@@ -3,8 +3,8 @@ import { Link } from '@inertiajs/react';
 export function HeroSection() {
     return (
         <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-b from-background to-muted">
-            <div className="container px-4 md:px-6">
-                <div className="flex flex-col items-center space-y-4 text-center">
+            <div className="container px-4 md:px-6 flex items-center justify-center">
+                <div className="flex flex-col items-center justify-center space-y-4 text-center">
                     <div className="space-y-2">
                         <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl">
                             Your Gateway to Tech Resources
@@ -20,16 +20,9 @@ export function HeroSection() {
                         >
                             Explore Content
                         </Link>
-                        <Link
-                            href="#jobs"
-                            className="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-8 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                        >
-                            Find Jobs
-                        </Link>
                     </div>
                 </div>
             </div>
         </section>
     )
 }
-

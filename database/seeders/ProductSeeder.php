@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\Product;
 use App\Models\User;
-use App\Models\Category;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
@@ -19,38 +18,14 @@ class ProductSeeder extends Seeder
     {
         $faker = Faker::create();
 
-        // Get all users and categories to assign random IDs
+        // Get all users and assign random IDs
         $userIds = User::pluck('id')->toArray();
-        $categoryIds = Category::pluck('id')->toArray();
 
-        // Check if we have users and categories
+        // Check if we have users
         if (empty($userIds)) {
             // Create a default user if none exists
             $user = User::factory()->create();
             $userIds = [$user->id];
-        }
-
-        if (empty($categoryIds)) {
-            // Create some default categories if none exist
-            $categories = [
-                'Web Development',
-                'Mobile Development',
-                'AI & Machine Learning',
-                'DevOps',
-                'Design Tools'
-            ];
-
-            foreach ($categories as $category) {
-                Category::create([
-                    'name' => $category,
-                    'slug' => Str::slug($category),
-                    'module' => 'product',
-                    'created_at' => Carbon::now(),
-                    'updated_at' => Carbon::now()
-                ]);
-            }
-
-            $categoryIds = Category::pluck('id')->toArray();
         }
 
         // Sample product data
@@ -165,7 +140,6 @@ class ProductSeeder extends Seeder
                 'description' => $productData['description'],
                 'image' => $faker->imageUrl(640, 480, null, true),  // Generates a random image URL
                 'user_id' => $faker->randomElement($userIds),
-                'primary_category_id' => $faker->randomElement($categoryIds),
                 'pricing_type' => $faker->randomElement($pricingTypes),
                 'is_open_source' => $productData['is_open_source'],
                 'repo_url' => $productData['is_open_source'] ? $productData['repo_url'] : null,
@@ -175,28 +149,5 @@ class ProductSeeder extends Seeder
             ]);
         }
 
-        // Create additional random products
-//        for ($i = 0; $i < 20; $i++) {
-//            $name = $faker->unique()->words(rand(1, 3), true);
-//            $isOpenSource = $faker->boolean(70);  // 70% will be open source
-//            $pricingTypes = ['Free', 'Freemium', 'Paid'];
-//
-//            Product::create([
-//                'name' => ucwords($name),
-//                'slug' => Str::slug($name) .' '. $i,
-//                'description' => $faker->paragraph(3),
-//                'image' => $faker->imageUrl(640, 480, null, true),
-//                'user_id' => $faker->randomElement($userIds),
-//                'category_id' => $faker->randomElement($categoryIds),
-//                'pricing_type' => $faker->randomElement($pricingTypes),
-//                'is_open_source' => $isOpenSource,
-//                'repo_url' => $isOpenSource ? 'https://github.com/' . $faker->userName . '/' . Str::slug($name) : null,
-//                'website_url' => $faker->boolean(80) ? 'https://' . Str::slug($name) . '.com' : null,
-//                'stars_count' => $isOpenSource ? $faker->numberBetween(0, 50000) : null,
-//                'is_featured' => $faker->boolean(20),  // 20% will be featured
-//                'created_at' => Carbon::now(),
-//                'updated_at' => Carbon::now()
-//            ]);
-//        }
     }
 }

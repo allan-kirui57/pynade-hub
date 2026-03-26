@@ -9,12 +9,6 @@ import { Pagination } from '@/components/pagination';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 
-interface Category {
-    id: number;
-    name: string;
-    slug: string;
-    count: number;
-}
 
 interface Product {
     id: number;
@@ -22,11 +16,6 @@ interface Product {
     slug: string;
     description: string;
     image: string;
-    category: {
-        id: number;
-        name: string;
-        slug: string;
-    };
     pricing: "Free" | "Freemium" | "Paid";
     stars?: number;
     language?: string;
@@ -57,14 +46,12 @@ interface PaginatedProducts {
 
 interface Props {
     products: PaginatedProducts;
-    categories: Category[];
     featuredProducts: Product[];
     popularProducts: Product[];
     newArrivals: Product[];
     openSourcePicks: Product[];
     filters: {
         search?: string;
-        category?: string;
         pricing?: string;
         openSource?: boolean;
         sort?: string;
@@ -73,7 +60,6 @@ interface Props {
 
 export default function Index({
                                   products,
-                                  categories,
                                   featuredProducts,
                                   popularProducts,
                                   newArrivals,
@@ -114,8 +100,6 @@ export default function Index({
                         </div>
 
                         <ProductFilters
-                            categories={categories}
-                            selectedCategory={filters?.category}
                             selectedPricing={filters?.pricing}
                             selectedSort={filters?.sort}
                             isOpenSource={filters?.openSource}

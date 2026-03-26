@@ -6,11 +6,11 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreBlogRequest;
 use App\Models\Blog;
-use App\Models\Category;
 use App\Models\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -20,7 +20,7 @@ class BlogController extends Controller
     public function index(Request $request)
     {
         $query = Blog::query()
-            ->with('user:id,name', 'primaryCategory:id,name')
+            ->with('author:id,name')
             ->withCount('comments');
 
         // Handle search
@@ -28,33 +28,21 @@ class BlogController extends Controller
             $query->where('title', 'like', "%{$request->search}%");
         }
 
-        // Handle filters
-        if ($request->has('category')) {
-            $query->where('primary_category_id', $request->category);
-        }
-
         $blogs = $query->latest()
             ->paginate(10)
             ->withQueryString();
 
-        $categories = Category::forModule('blog')
-            ->active()
-            ->get(['id', 'name']);
-
         return Inertia::render('admin/blogs/Index', [
             'blogs' => $blogs,
-            'categories' => $categories,
-            'filters' => $request->only(['search', 'category']),
+            'filters' => $request->only(['search']),
         ]);
     }
 
     public function create()
     {
-        $categories = Category::get(['id', 'name']);
         $tags = Tag::get(['id', 'name']);
 
         return Inertia::render('admin/blogs/Create', [
-            'categories' => $categories,
             'tags' => $tags,
         ]);
     }
@@ -81,9 +69,6 @@ class BlogController extends Controller
             $validated['featured_image'] = $path;
         }
 
-        // Sync categories
-//        $blog->categories()->sync($data['category_ids']);
-
         // Sync tags
         if (!empty($data['tags'])) {
             $blog->syncTags($data['tags'], 'blog');
@@ -95,21 +80,18 @@ class BlogController extends Controller
 
     public function show(Blog $blog)
     {
-        return Inertia::render('Admin/Blogs/Show', ['blog' => $blog]);
+        return Inertia::render('admin/blogs/Show', ['blog' => $blog]);
     }
 
     public function edit(Blog $blog)
     {
-        $blog->load(['categories', 'tags']);
+        $blog->load(['tags']);
 
-        $categories = Category::forModule('blog')->active()->get(['id', 'name']);
         $tags = Tag::inGroup('blog')->get(['id', 'name']);
 
-        return Inertia::render('Admin/Blogs/Edit', [
+        return Inertia::render('admin/blogs/Edit', [
             'blog' => $blog,
-            'categories' => $categories,
             'tags' => $tags,
-            'selectedCategories' => $blog->categories->pluck('id'),
             'selectedTags' => $blog->tags->pluck('name'),
         ]);
     }
@@ -121,9 +103,6 @@ class BlogController extends Controller
             'content' => 'required|string',
             'excerpt' => 'nullable|string',
             'featured_image' => 'nullable|image|max:2048',
-            'category_ids' => 'required|array',
-            'category_ids.*' => 'exists:categories,id',
-            'primary_category_id' => 'required|exists:categories,id',
             'tags' => 'nullable|array',
             'published_at' => 'nullable|date',
         ]);
@@ -151,11 +130,7 @@ class BlogController extends Controller
             $blog->featured_image = $validated['featured_image'];
         }
         $blog->published_at = $validated['published_at'] ?? $blog->published_at;
-        $blog->primary_category_id = $validated['primary_category_id'];
         $blog->save();
-
-        // Sync categories
-        $blog->categories()->sync($validated['category_ids']);
 
         // Sync tags
         if (isset($validated['tags'])) {

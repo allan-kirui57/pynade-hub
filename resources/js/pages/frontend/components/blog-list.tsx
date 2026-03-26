@@ -1,8 +1,6 @@
 import React from 'react';
 import { Link } from '@inertiajs/react';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar, Clock, Eye } from 'lucide-react';
 
 interface Blog {
     id: number;
@@ -12,11 +10,6 @@ interface Blog {
     image: string;
     published_at: string;
     read_time: string;
-    category: {
-        id: number;
-        name: string;
-        slug: string;
-    };
     tags: {
         id: number;
         name: string;
@@ -47,71 +40,54 @@ export default function BlogList({ blogs }: BlogListProps) {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {blogs.map((blog) => (
-                <Card key={blog.id} className="overflow-hidden transition-all hover:shadow-md">
-                    <div className="grid grid-cols-1 md:grid-cols-3">
-                        <div className="aspect-video relative md:col-span-1">
+                <article key={blog.id} className="group flex flex-col">
+                    {/* Thumbnail */}
+                    <Link
+                        href={route('frontend.blogs.show', blog.slug)}
+                        className="block overflow-hidden rounded-xl"
+                    >
+                        <img
+                            src={blog.image || '/placeholder.svg?height=400&width=600'}
+                            alt={blog.title}
+                            className="aspect-video w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                    </Link>
+
+                    {/* Content */}
+                    <div className="mt-4 flex flex-1 flex-col">
+
+                        {/* Title */}
+                        <h2 className="text-lg font-bold leading-snug tracking-tight text-foreground">
+                            <Link
+                                href={route('frontend.blogs.show', blog.slug)}
+                                className="hover:text-primary transition-colors duration-150 line-clamp-2"
+                            >
+                                {blog.title}
+                            </Link>
+                        </h2>
+
+                        {/* Excerpt */}
+                        <p className="mt-2 flex-1 line-clamp-3 text-sm text-muted-foreground leading-relaxed">
+                            {blog.excerpt}
+                        </p>
+
+                        {/* Footer: author + date */}
+                        <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
                             <img
-                                src={blog.image || '/placeholder.svg?height=200&width=300'}
-                                alt={blog.title}
-                                className="h-full w-full object-cover"
+                                src={blog.author?.avatar || '/placeholder.svg?height=24&width=24'}
+                                alt={blog.author?.name}
+                                className="h-6 w-6 rounded-full object-cover"
                             />
-                        </div>
-                        <div className="flex flex-col md:col-span-2">
-                            <CardHeader>
-                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                    {/*<Link*/}
-                                    {/*    href={route('blogs.category', blog.category.id)}*/}
-                                    {/*    className="hover:text-foreground"*/}
-                                    {/*>*/}
-                                        <Badge variant="secondary">{blog.category?.name}</Badge>
-                                    {/*</Link>*/}
-                                    <div className="flex items-center gap-1">
-                                        <Calendar className="h-3.5 w-3.5" />
-                                        <span>{blog.published_at}</span>
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                        <Clock className="h-3.5 w-3.5" />
-                                        <span>{blog.read_time}</span>
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                        <Eye className="h-3.5 w-3.5" />
-                                        <span>{blog.views} views</span>
-                                    </div>
-                                </div>
-                                <CardTitle className="mt-2 line-clamp-2 hover:text-primary">
-                                    <Link href={route('frontend.blogs.show', blog.slug)}>{blog.title}</Link>
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="flex-grow">
-                                <p className="line-clamp-3 text-muted-foreground">{blog.excerpt}</p>
-                            </CardContent>
-                            <CardFooter className="flex items-center justify-between">
-                                <div className="flex flex-wrap gap-2">
-                                    {blog.tags.slice(0, 3).map((tag) => (
-                                        <Link key={tag.id} href={route('blogs.tag', tag.slug)}>
-                                            <Badge variant="outline" className="hover:bg-secondary">
-                                                {tag.name}
-                                            </Badge>
-                                        </Link>
-                                    ))}
-                                    {blog.tags.length > 3 && (
-                                        <Badge variant="outline">+{blog.tags.length - 3}</Badge>
-                                    )}
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <img
-                                        src={blog.author?.avatar || '/placeholder.svg?height=32&width=32'}
-                                        alt={blog.author?.name}
-                                        className="h-6 w-6 rounded-full object-cover"
-                                    />
-                                    <span className="text-sm text-muted-foreground">{blog.author?.name}</span>
-                                </div>
-                            </CardFooter>
+                            <span className="font-medium text-foreground">{blog.author?.name}</span>
+                            <span>·</span>
+                            <span>{blog.published_at}</span>
+                            <span>·</span>
+                            <span>{blog.read_time}</span>
                         </div>
                     </div>
-                </Card>
+                </article>
             ))}
         </div>
     );

@@ -23,11 +23,6 @@ const mainNavItems: NavItem[] = [
         href: '/admin/products',
         icon: BookOpen,
     },
-    {
-        title: 'Vacancies',
-        href: '/admin/vacancies',
-        icon: BookOpen,
-    },
 ];
 
 const footerNavItems: NavItem[] = [

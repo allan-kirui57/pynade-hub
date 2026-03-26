@@ -35,14 +35,6 @@ class Tag extends Model
     }
 
     /**
-     * Get all vacancies with this tag.
-     */
-    public function vacancies()
-    {
-        return $this->morphedByMany(Vacancy::class, 'taggable');
-    }
-
-    /**
      * Scope a query to only include tags from a specific group.
      */
     public function scopeInGroup(Builder $query, string $group): Builder
@@ -55,8 +47,8 @@ class Tag extends Model
      */
     public static function getPopularTags(string $group = null, int $limit = 10)
     {
-        $query = self::withCount(['blogs', 'products', 'vacancies'])
-            ->orderByRaw('blogs_count + products_count + vacancies_count DESC')
+        $query = self::withCount(['blogs', 'products',])
+            ->orderByRaw('blogs_count + products_count DESC')
             ->limit($limit);
 
         if ($group) {

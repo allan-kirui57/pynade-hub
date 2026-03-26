@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreBlogRequest;
 use App\Http\Requests\StoreProductRequest;
-use App\Models\Category;
 use App\Models\Product;
 use App\Services\GitHubService;
 use Illuminate\Http\Request;
@@ -32,7 +31,7 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $query = Product::query()
-            ->with(['primaryCategory', 'user'])
+            ->with(['user'])
             ->latest();
 
         // Apply filters if provided
@@ -41,10 +40,6 @@ class ProductController extends Controller
                 $q->where('name', 'like', "%{$request->search}%")
                     ->orWhere('description', 'like', "%{$request->search}%");
             });
-        }
-
-        if ($request->filled('category')) {
-            $query->where('primary_category_id', $request->category);
         }
 
         if ($request->filled('pricing_type')) {
@@ -70,22 +65,15 @@ class ProductController extends Controller
                 'stars_count' => $product->stars_count,
                 'is_featured' => $product->is_featured,
                 'created_at' => $product->created_at,
-                'primaryCategory' => $product->primaryCategory ? [
-                    'id' => $product->primaryCategory->id,
-                    'name' => $product->primaryCategory->name,
-                ] : null,
                 'user' => $product->user ? [
                     'id' => $product->user->id,
                     'name' => $product->user->name,
                 ] : null,
             ]);
 
-        $categories = Category::select('id', 'name')->get();
-
         return Inertia::render('admin/products/Index', [
             'products' => $products,
-            'categories' => $categories,
-            'filters' => $request->only(['search', 'category', 'pricing_type', 'is_featured']),
+            'filters' => $request->only(['search', 'pricing_type', 'is_featured']),
         ]);
     }
 
@@ -94,10 +82,8 @@ class ProductController extends Controller
      */
     public function create()
     {
-        $categories = Category::select('id', 'name')->get();
 
         return Inertia::render('admin/products/Create', [
-            'categories' => $categories,
             'pricingTypes' => $this->getPricingTypes(),
         ]);
     }
@@ -150,7 +136,7 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        $product->load(['primaryCategory', 'user']);
+        $product->load(['user']);
 
         return Inertia::render('admin/products/Show', [
             'product' => [
@@ -167,10 +153,6 @@ class ProductController extends Controller
                 'is_featured' => $product->is_featured,
                 'created_at' => $product->created_at,
                 'updated_at' => $product->updated_at,
-                'primaryCategory' => $product->primaryCategory ? [
-                    'id' => $product->primaryCategory->id,
-                    'name' => $product->primaryCategory->name,
-                ] : null,
                 'user' => $product->user ? [
                     'id' => $product->user->id,
                     'name' => $product->user->name,
@@ -184,7 +166,6 @@ class ProductController extends Controller
      */
     public function edit(Product $product)
     {
-        $categories = Category::select('id', 'name')->get();
 
         return Inertia::render('admin/products/Edit', [
             'product' => [
@@ -199,9 +180,7 @@ class ProductController extends Controller
                 'website_url' => $product->website_url,
                 'stars_count' => $product->stars_count,
                 'is_featured' => $product->is_featured,
-                'primary_category_id' => $product->primary_category_id,
             ],
-            'categories' => $categories,
             'pricingTypes' => $this->getPricingTypes(),
         ]);
     }
@@ -214,7 +193,6 @@ class ProductController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
-            'primary_category_id' => 'required|exists:categories,id',
             'pricing_type' => 'required|string|in:free,paid,freemium',
             'is_open_source' => 'boolean',
             'repo_url' => 'nullable|url|max:255',

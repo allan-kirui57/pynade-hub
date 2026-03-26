@@ -25,9 +25,6 @@ export function SiteHeader() {
                         <Link href={'/products'} className="text-sm font-medium transition-colors hover:text-primary">
                             Products
                         </Link>
-                        <Link href={'/vacancies'} className="text-sm font-medium transition-colors hover:text-primary">
-                            Jobs
-                        </Link>
                         <Link href="#" className="text-sm font-medium transition-colors hover:text-primary">
                             About
                         </Link>

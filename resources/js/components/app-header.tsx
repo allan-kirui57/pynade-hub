@@ -26,11 +26,6 @@ const mainNavItems: NavItem[] = [
         href: '/admin/blogs',
         icon: BookOpen,
     },
-    {
-        title: 'Vacancies',
-        href: '/admin/vacancies',
-        icon: BookOpen,
-    },
 ];
 
 const rightNavItems: NavItem[] = [

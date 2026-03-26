@@ -4,9 +4,6 @@
 namespace App\Services;
 
 use App\Models\Blog;
-use App\Models\Product;
-use App\Models\Job;
-use App\Models\Category;
 use App\Models\Tag;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
@@ -20,7 +17,6 @@ class ContentService
     {
         $query = Blog::with([
             'author:id,name,avatar',
-            'category:id,name,slug',
             'tags:id,name,slug',
             'comments' => function ($query) {
                 $query->count();
@@ -31,13 +27,6 @@ class ContentService
             }
         ]);
 
-        // Apply filters
-        if (!empty($filters['category_id'])) {
-            $query->whereHas('categories', function ($q) use ($filters) {
-                $q->where('categories.id', $filters['category_id']);
-            });
-        }
-
         if (!empty($filters['tag_id'])) {
             $query->whereHas('tags', function ($q) use ($filters) {
                 $q->where('tags.id', $filters['tag_id']);
@@ -47,38 +36,6 @@ class ContentService
         // Add more filters as needed
 
         return $query->latest('published_at')->paginate($perPage);
-    }
-
-    /**
-     * Similar methods for products and jobs
-     */
-
-    /**
-     * Get categories with counts for a specific module.
-     */
-    public function getCategoriesWithCounts(string $module): array
-    {
-        $cacheKey = "categories_with_counts_{$module}";
-
-        return Cache::remember($cacheKey, now()->addHours(6), function () use ($module) {
-            $categories = Category::forModule($module)->active()->get();
-
-            foreach ($categories as $category) {
-                switch ($module) {
-                    case 'blog':
-                        $category->count = $category->blogs()->count();
-                        break;
-                    case 'product':
-                        $category->count = $category->products()->count();
-                        break;
-                    case 'job':
-                        $category->count = $category->vacancies()->count();
-                        break;
-                }
-            }
-
-            return $categories->toArray();
-        });
     }
 
     /**

@@ -12,7 +12,6 @@ return new class extends Migration
         Schema::create('blogs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('category_id')->nullable()->constrained('categories')->nullOnDelete();
             $table->string('title');
             $table->string('slug')->unique();
             $table->text('excerpt')->nullable();
@@ -20,7 +19,6 @@ return new class extends Migration
             $table->string('featured_image')->nullable();
             $table->timestamp('published_at')->nullable();
             $table->string('read_time')->nullable();
-            $table->foreignId('primary_category_id')->nullable()->constrained('categories')->nullOnDelete();
             $table->boolean('is_featured')->default(false);
             $table->timestamps();
             $table->softDeletes();

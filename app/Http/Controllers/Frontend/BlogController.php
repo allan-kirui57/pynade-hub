@@ -5,8 +5,6 @@ namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
 use App\Models\Blog;
-use App\Models\Category;
-use App\Models\Tag;
 use App\Services\ContentService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -22,16 +20,14 @@ class BlogController extends Controller
 
     public function index(Request $request)
     {
-        $filters = $request->only(['category', 'tag', 'search']);
+        $filters = $request->only(['tag', 'search']);
 
         $blogs = $this->contentService->getPaginatedBlogs($filters);
 
-        $categories = $this->contentService->getCategoriesWithCounts('blog');
         $popularTags = $this->contentService->getPopularTags('blog');
 
         return Inertia::render('frontend/blogs/index', [
             'blogs' => $blogs,
-            'categories' => $categories,
             'popularTags' => $popularTags,
             'filters' => $filters,
         ]);
@@ -41,7 +37,6 @@ class BlogController extends Controller
     {
         $blog->load([
             'author:id,name,avatar,bio',
-            'category:id,name,slug',
             'tags:id,name,slug',
             'comments' => function ($query) {
                 $query->with('user:id,name,avatar')
@@ -53,27 +48,22 @@ class BlogController extends Controller
             }
         ]);
 
-        // Increment view count or track analytics here
-
         // Get related blogs
         $relatedBlogs = Blog::where('id', '!=', $blog->id)
             ->where(function ($query) use ($blog) {
-                $query->where('primary_category_id', $blog->primary_category_id)
-                    ->orWhereHas('tags', function ($q) use ($blog) {
+                $query->whereHas('tags', function ($q) use ($blog) {
                         $q->whereIn('tags.id', $blog->tags->pluck('id'));
                     });
             })
-            ->with('author:id,name', 'category:id,name')
+            ->with('author:id,name')
             ->latest('published_at')
             ->take(3)
             ->get();
 
-        $categories = $this->contentService->getCategoriesWithCounts('blog');
         $popularTags = $this->contentService->getPopularTags('blog');
 
         return Inertia::render('frontend/blogs/show', [
             'blog' => $blog,
-            'categories' => $categories,
             'popularTags' => $popularTags,
             'relatedBlogs' => $relatedBlogs,
         ]);

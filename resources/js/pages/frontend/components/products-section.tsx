@@ -1,127 +1,23 @@
 import React from 'react';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { ThumbsUp, ThumbsDown, MessageSquare, ExternalLink, Star, GitlabIcon as GitHubLogoIcon } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-
-interface Product {
-    id: number;
-    title: string;
-    description: string;
-    image: string;
-    category: string;
-    pricing: "Free" | "Freemium" | "Paid";
-    stars?: number;
-    language?: string;
-    repoUrl?: string;
-    comments: number;
-    upvotes: number;
-    downvotes: number;
-    link: string;
-    isOpenSource: boolean;
-}
+import { SharedData } from '@/types';
+import { Product } from '@/types/product';
 
 interface PricingVariants {
     [key: string]: "secondary" | "outline" | "default";
 }
+interface Props extends SharedData {
+    products: Product[];
+}
 
 export default function ProductsSection() {
-    // Sample products data (combined projects and open source)
-    const products: Product[] = [
-        {
-            id: 1,
-            title: "NextUI",
-            description: "Beautiful, fast and modern React UI library with first-class support for Next.js",
-            image: "/placeholder.svg?height=200&width=400",
-            category: "Open Source",
-            pricing: "Free",
-            stars: 12543,
-            language: "TypeScript",
-            repoUrl: "https://github.com/nextui-org/nextui",
-            comments: 32,
-            upvotes: 245,
-            downvotes: 12,
-            link: "https://nextui.org",
-            isOpenSource: true,
-        },
-        {
-            id: 2,
-            title: "FinTrack",
-            description: "An AI-powered personal finance tracker with budget forecasting and investment recommendations.",
-            image: "/placeholder.svg?height=200&width=400",
-            category: "Fintech",
-            pricing: "Freemium",
-            comments: 24,
-            upvotes: 187,
-            downvotes: 8,
-            link: "#",
-            isOpenSource: false,
-        },
-        {
-            id: 3,
-            title: "Tauri",
-            description: "Build smaller, faster, and more secure desktop applications with a web frontend",
-            image: "/placeholder.svg?height=200&width=400",
-            category: "Open Source",
-            pricing: "Free",
-            stars: 67321,
-            language: "Rust",
-            repoUrl: "https://github.com/tauri-apps/tauri",
-            comments: 87,
-            upvotes: 678,
-            downvotes: 23,
-            link: "https://tauri.app",
-            isOpenSource: true,
-        },
-        {
-            id: 4,
-            title: "HarvestHub",
-            description: "Smart farming platform that uses IoT sensors and AI to optimize crop yields and resource usage.",
-            image: "/placeholder.svg?height=200&width=400",
-            category: "Agritech",
-            pricing: "Paid",
-            comments: 18,
-            upvotes: 143,
-            downvotes: 12,
-            link: "#",
-            isOpenSource: false,
-        },
-        {
-            id: 5,
-            title: "ShadcnUI",
-            description: "Beautifully designed components built with Radix UI and Tailwind CSS",
-            image: "/placeholder.svg?height=200&width=400",
-            category: "Open Source",
-            pricing: "Free",
-            stars: 34982,
-            language: "TypeScript",
-            repoUrl: "https://github.com/shadcn/ui",
-            comments: 56,
-            upvotes: 432,
-            downvotes: 8,
-            link: "https://ui.shadcn.com",
-            isOpenSource: true,
-        },
-        {
-            id: 6,
-            title: "MedConnect",
-            description: "Telemedicine platform connecting patients with healthcare providers for virtual consultations.",
-            image: "/placeholder.svg?height=200&width=400",
-            category: "Healthtech",
-            pricing: "Free",
-            comments: 32,
-            upvotes: 215,
-            downvotes: 5,
-            link: "#",
-            isOpenSource: false,
-        },
-    ];
-
-    // Categories for filtering
-    const categories = ["All", "Open Source", "Fintech", "Agritech", "Healthtech", "Edtech", "Cleantech"];
+    const { products } = usePage<Props>().props;
 
     // Pricing badge variants
     const pricingVariants: PricingVariants = {
@@ -151,13 +47,6 @@ export default function ProductsSection() {
                 </div>
 
                 <Tabs defaultValue="All" className="mt-8">
-                    <TabsList className="mb-6 flex flex-wrap justify-center md:justify-start">
-                        {categories.map((category) => (
-                            <TabsTrigger key={category} value={category} className="mb-2">
-                                {category}
-                            </TabsTrigger>
-                        ))}
-                    </TabsList>
                     <TabsContent value="All" className="mt-0">
                         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                             {products.map((product) => (
@@ -176,7 +65,6 @@ export default function ProductsSection() {
                                     </div>
                                     <CardHeader>
                                         <div className="flex items-center justify-between">
-                                            <Badge variant="secondary">{product.category}</Badge>
                                             <div className="flex items-center gap-2">
                                                 {product.isOpenSource && (
                                                     <div className="flex items-center gap-1 text-sm text-muted-foreground">
@@ -238,7 +126,7 @@ export default function ProductsSection() {
                             ))}
                         </div>
                     </TabsContent>
-                    {/* Other tab contents would be similar but filtered by category */}
+
                 </Tabs>
             </div>
         </section>

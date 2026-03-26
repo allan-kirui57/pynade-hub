@@ -19,15 +19,11 @@ interface Category {
 }
 
 interface BlogFiltersProps {
-    categories: Category[];
-    selectedCategory?: string;
     selectedTag?: string;
     selectedSort?: string;
 }
 
 export default function BlogFilters({
-                                        categories,
-                                        selectedCategory,
                                         selectedTag,
                                         selectedSort,
                                     }: BlogFiltersProps) {
@@ -45,17 +41,6 @@ export default function BlogFilters({
 
     const getActiveFilters = () => {
         const filters = [];
-
-        if (selectedCategory) {
-            const category = categories.find(c => c.slug === selectedCategory);
-            if (category) {
-                filters.push({
-                    type: 'category',
-                    label: category.name,
-                    value: selectedCategory,
-                });
-            }
-        }
 
         if (selectedTag) {
             filters.push({

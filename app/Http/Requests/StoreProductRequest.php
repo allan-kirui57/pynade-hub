@@ -16,13 +16,6 @@ class StoreProductRequest extends FormRequest
 
     public function prepareForValidation(): void
     {
-        if ($this->has('category_id')) {
-            if ($this->category_id === '' || $this->category_id === null) {
-                $this->merge(['category_id' => null]);
-            } else {
-                $this->merge(['category_id' => (int) $this->category_id]);
-            }
-        }
         if ($this->has('pricing_type')) {
             if ($this->pricing_type === '' || $this->pricing_type === null) {
                 $this->merge(['pricing_type' => null]);
@@ -46,8 +39,8 @@ class StoreProductRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
+            'slug' => 'required|string',
             'description' => 'required|string',
-            'category_id' => 'required|exists:categories,id',
             'pricing_type' => 'required|string|in:Free,Paid,Freemium',
             'is_open_source' => 'boolean',
             'repo_url' => 'nullable|url|max:255',

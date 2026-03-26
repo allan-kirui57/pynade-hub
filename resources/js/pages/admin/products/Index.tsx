@@ -30,7 +30,6 @@ import {
     ArrowUpDown,
     ChevronLeft,
     ChevronRight,
-    Tag,
     ShoppingCart,
 } from "lucide-react"
 
@@ -53,25 +52,14 @@ interface Product {
     stock_quantity: number
     status: "active" | "draft" | "archived"
     is_featured: boolean
-    category_id: number
-    category_name: string
     created_at: string
     updated_at: string
     image_url: string
 }
 
-// Pagination type
-interface Pagination {
-    current_page: number
-    last_page: number
-    per_page: number
-    total: number
-}
-
 // Update the component props and destructuring to match the Laravel/Inertia structure
 export default function ProductIndex({
                                          products,
-                                         categories = [],
                                          filters = {},
                                      }: {
     products: {
@@ -81,11 +69,9 @@ export default function ProductIndex({
         per_page: number
         total: number
     }
-    categories: { id: number; name: string }[]
     filters: Record<string, any>
 }) {
     const [searchTerm, setSearchTerm] = useState(filters.search || "")
-    const [categoryFilter, setCategoryFilter] = useState<string>(filters.category || "")
     const [statusFilter, setStatusFilter] = useState<string>(filters.pricing_type || "")
     const [sortField, setSortField] = useState<string>("created_at")
     const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc")
@@ -93,7 +79,6 @@ export default function ProductIndex({
     // Form for handling search and filters
     const { get } = useForm({
         search: searchTerm,
-        category: categoryFilter,
         pricing_type: statusFilter,
         sort_field: sortField,
         sort_direction: sortDirection,
@@ -108,7 +93,6 @@ export default function ProductIndex({
         get("/admin/products", {
             data: {
                 search: searchTerm,
-                category: categoryFilter,
                 pricing_type: statusFilter,
                 sort_field: field,
                 sort_direction: direction,
@@ -123,7 +107,6 @@ export default function ProductIndex({
         get("/admin/products", {
             data: {
                 search: searchTerm,
-                category: categoryFilter,
                 pricing_type: statusFilter,
                 sort_field: sortField,
                 sort_direction: sortDirection,
@@ -138,28 +121,6 @@ export default function ProductIndex({
         get("/admin/products", {
             preserveState: true,
         })
-    }
-
-    // Function to format price
-    const formatPrice = (price: number) => {
-        return new Intl.NumberFormat("en-US", {
-            style: "currency",
-            currency: "USD",
-        }).format(price)
-    }
-
-    // Function to determine the status badge color
-    const getStatusBadge = (status: string) => {
-        switch (status) {
-            case "active":
-                return <Badge className="bg-green-500">Active</Badge>
-            case "draft":
-                return <Badge variant="outline">Draft</Badge>
-            case "archived":
-                return <Badge variant="secondary">Archived</Badge>
-            default:
-                return <Badge variant="outline">{status}</Badge>
-        }
     }
 
     return (
@@ -183,47 +144,25 @@ export default function ProductIndex({
                     </CardHeader>
                     <CardContent>
                         {/* Filters and search */}
-                        <div className="flex flex-col gap-4 mb-6 sm:flex-row">
+                        <div className="mb-6 flex flex-col gap-4 sm:flex-row">
                             <div className="relative flex-grow">
-                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                <Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
                                 <Input
                                     type="search"
                                     placeholder="Search products..."
                                     className="pl-8"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                                 />
                             </div>
 
                             <div className="flex gap-2">
-                                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                                    <SelectTrigger className="w-[180px]">
-                                        <div className="flex items-center gap-2">
-                                            <Tag className="h-4 w-4" />
-                                            <span>
-                        {categoryFilter
-                            ? "Category: " +
-                            (categories.find((c) => c.id.toString() === categoryFilter)?.name || categoryFilter)
-                            : "All Categories"}
-                      </span>
-                                        </div>
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All Categories</SelectItem>
-                                        {categories.map((category) => (
-                                            <SelectItem key={category.id} value={category.id.toString()}>
-                                                {category.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-
                                 <Select value={statusFilter} onValueChange={setStatusFilter}>
                                     <SelectTrigger className="w-[150px]">
                                         <div className="flex items-center gap-2">
                                             <Filter className="h-4 w-4" />
-                                            <span>{statusFilter ? "Status: " + statusFilter : "All Status"}</span>
+                                            <span>{statusFilter ? 'Status: ' + statusFilter : 'All Status'}</span>
                                         </div>
                                     </SelectTrigger>
                                     <SelectContent>
@@ -247,24 +186,23 @@ export default function ProductIndex({
                                     <TableRow>
                                         <TableHead className="w-[80px]">Image</TableHead>
                                         <TableHead className="w-[300px]">
-                                            <div className="flex items-center cursor-pointer" onClick={() => handleSort("name")}>
+                                            <div className="flex cursor-pointer items-center" onClick={() => handleSort('name')}>
                                                 Product
                                                 <ArrowUpDown className="ml-2 h-4 w-4" />
                                             </div>
                                         </TableHead>
                                         <TableHead>
-                                            <div className="flex items-center cursor-pointer" onClick={() => handleSort("price")}>
+                                            <div className="flex cursor-pointer items-center" onClick={() => handleSort('price')}>
                                                 Price
                                                 <ArrowUpDown className="ml-2 h-4 w-4" />
                                             </div>
                                         </TableHead>
                                         <TableHead>
-                                            <div className="flex items-center cursor-pointer" onClick={() => handleSort("stock_quantity")}>
+                                            <div className="flex cursor-pointer items-center" onClick={() => handleSort('stock_quantity')}>
                                                 Stock
                                                 <ArrowUpDown className="ml-2 h-4 w-4" />
                                             </div>
                                         </TableHead>
-                                        <TableHead>Category</TableHead>
                                         <TableHead>Status</TableHead>
                                         <TableHead className="w-[100px]">Actions</TableHead>
                                     </TableRow>
@@ -277,41 +215,36 @@ export default function ProductIndex({
                                             </TableCell>
                                         </TableRow>
                                     ) : (
-                                        products.data.map((product) => (
+                                        products.data.map((product: Product) => (
                                             <TableRow key={product.id}>
                                                 <TableCell>
-                                                    <div className="h-12 w-12 rounded-md border overflow-hidden">
+                                                    <div className="h-12 w-12 overflow-hidden rounded-md border">
                                                         {product.image ? (
                                                             <img
-                                                                src={product.image || "/placeholder.svg"}
+                                                                src={product.image || '/placeholder.svg'}
                                                                 alt={product.name}
                                                                 className="h-full w-full object-cover"
                                                             />
                                                         ) : (
-                                                            <div className="flex h-full w-full items-center justify-center bg-muted">
-                                                                <ShoppingCart className="h-6 w-6 text-muted-foreground" />
+                                                            <div className="bg-muted flex h-full w-full items-center justify-center">
+                                                                <ShoppingCart className="text-muted-foreground h-6 w-6" />
                                                             </div>
                                                         )}
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
                                                     <div className="font-medium">{product.name}</div>
-                                                    <div className="text-sm text-muted-foreground">Slug: {product.slug}</div>
+                                                    <div className="text-muted-foreground text-sm">Slug: {product.slug}</div>
                                                 </TableCell>
                                                 <TableCell>
                                                     <div className="font-medium">{product.pricing_type}</div>
                                                 </TableCell>
                                                 <TableCell>
                                                     <div className="flex items-center">
-                            <span className="font-medium">
-                              {product.is_open_source ? "Open Source" : "Closed Source"}
-                            </span>
+                                                        <span className="font-medium">
+                                                            {product.is_open_source ? 'Open Source' : 'Closed Source'}
+                                                        </span>
                                                     </div>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Badge variant="outline" className="font-normal">
-                                                        {product.primaryCategory?.name || "Uncategorized"}
-                                                    </Badge>
                                                 </TableCell>
                                                 <TableCell>
                                                     {product.is_featured ? (
@@ -363,13 +296,11 @@ export default function ProductIndex({
 
                         {/* Pagination */}
                         {products && products.last_page > 1 && (
-                            <div className="flex items-center justify-between mt-4">
-                                <div className="text-sm text-muted-foreground">
-                                    Showing <span className="font-medium">{(products.current_page - 1) * products.per_page + 1}</span> to{" "}
-                                    <span className="font-medium">
-                    {Math.min(products.current_page * products.per_page, products.total)}
-                  </span>{" "}
-                                    of <span className="font-medium">{products.total}</span> results
+                            <div className="mt-4 flex items-center justify-between">
+                                <div className="text-muted-foreground text-sm">
+                                    Showing <span className="font-medium">{(products.current_page - 1) * products.per_page + 1}</span> to{' '}
+                                    <span className="font-medium">{Math.min(products.current_page * products.per_page, products.total)}</span> of{' '}
+                                    <span className="font-medium">{products.total}</span> results
                                 </div>
                                 <div className="flex items-center space-x-2">
                                     <Button
@@ -397,5 +328,5 @@ export default function ProductIndex({
                 </Card>
             </div>
         </AppLayout>
-    )
+    );
 }

@@ -21,14 +21,6 @@ class StoreBlogRequest extends FormRequest
      */
     protected function prepareForValidation()
     {
-        // Convert category_id to integer or null
-        if ($this->has('category_id')) {
-            if ($this->category_id === '' || $this->category_id === null) {
-                $this->merge(['category_id' => null]);
-            } else {
-                $this->merge(['category_id' => (int) $this->category_id]);
-            }
-        }
 
         // Convert is_featured to boolean
         if ($this->has('is_featured')) {
@@ -50,7 +42,6 @@ class StoreBlogRequest extends FormRequest
             'slug' => 'required|string|max:255|unique:blogs,slug,' . $this->id,
             'excerpt' => 'nullable|string',
             'content' => 'required|string',
-            'category_id' => 'required|integer|exists:categories,id',
             'featured_image' => $this->method() === 'POST'
                 ? 'nullable|image|max:2048'
                 : 'nullable|sometimes|image|max:2048',

@@ -15,11 +15,6 @@ interface Blog {
     image: string;
     published_at: string;
     read_time: string;
-    category: {
-        id: number;
-        name: string;
-        slug: string;
-    };
     tags: {
         id: number;
         name: string;
@@ -35,13 +30,12 @@ interface Blog {
 
 interface Props {
     blog: Blog;
-    categories: any[];
     tags: any[];
     popularBlogs: Blog[];
     relatedBlogs: Blog[];
 }
 
-export default function Show({ blog, categories, tags, popularBlogs, relatedBlogs }: Props) {
+export default function Show({ blog, tags, popularBlogs, relatedBlogs }: Props) {
     return (
         <>
             <Head title={`${blog.title} - TechHub Blog`} />
@@ -113,7 +107,7 @@ export default function Show({ blog, categories, tags, popularBlogs, relatedBlog
 
                         {/* Sidebar */}
                         <aside className="lg:col-span-1">
-                            <BlogSidebar categories={categories} tags={tags} popularBlogs={popularBlogs} />
+                            <BlogSidebar tags={tags} popularBlogs={popularBlogs} />
                         </aside>
                     </div>
                 </main>

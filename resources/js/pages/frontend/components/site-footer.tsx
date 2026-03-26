@@ -17,21 +17,21 @@ export function SiteFooter() {
                             Your gateway to tech resources, connecting developers with blogs, products, and job opportunities.
                         </p>
                         <div className="mt-6 flex space-x-4">
-                            <Link href="#" className="text-muted-foreground hover:text-foreground">
+                            <Link href="https://x.com/pynade" className="text-muted-foreground hover:text-foreground">
                                 <Twitter className="h-5 w-5" />
                                 <span className="sr-only">Twitter</span>
                             </Link>
-                            <Link href="#" className="text-muted-foreground hover:text-foreground">
-                                <Github className="h-5 w-5" />
-                                <span className="sr-only">GitHub</span>
+                            <Link href="https://web.facebook.com/pynade" className="text-muted-foreground hover:text-foreground">
+                                <Facebook className="h-5 w-5" />
+                                <span className="sr-only">Facebook</span>
                             </Link>
-                            <Link href="#" className="text-muted-foreground hover:text-foreground">
+                            <Link href="https://www.linkedin.com/in/allan-kirui/" className="text-muted-foreground hover:text-foreground">
                                 <Linkedin className="h-5 w-5" />
                                 <span className="sr-only">LinkedIn</span>
                             </Link>
-                            <Link href="#" className="text-muted-foreground hover:text-foreground">
-                                <Facebook className="h-5 w-5" />
-                                <span className="sr-only">Facebook</span>
+                            <Link href="https://github.com/allan-kirui57" className="text-muted-foreground hover:text-foreground">
+                                <Github className="h-5 w-5" />
+                                <span className="sr-only">GitHub</span>
                             </Link>
                         </div>
                     </div>
@@ -46,16 +46,6 @@ export function SiteFooter() {
                             <li>
                                 <Link href="/products" className="text-muted-foreground hover:text-foreground">
                                     Products
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/jobs" className="text-muted-foreground hover:text-foreground">
-                                    Jobs
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/community" className="text-muted-foreground hover:text-foreground">
-                                    Community
                                 </Link>
                             </li>
                         </ul>

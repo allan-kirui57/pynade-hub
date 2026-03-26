@@ -1,114 +1,65 @@
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent} from '@/components/ui/tabs';
+import { Blog } from '@/types/blog';
+import { Link, usePage } from '@inertiajs/react';
 import React from 'react';
-import { Link } from '@inertiajs/react';
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SharedData } from '@/types';
 
-interface Blog {
-    id: number;
-    title: string;
-    excerpt: string;
-    image: string;
-    date: string;
-    readTime: string;
-    category: string;
-    tags: string[];
+interface Props extends SharedData {
+    blogs: Blog[];
 }
-
 export default function BlogSection() {
-    // Sample blog data
-    const blogs: Blog[] = [
-        {
-            id: 1,
-            title: "Getting Started with Next.js 14",
-            excerpt: "Learn how to build modern web applications with Next.js 14 and its new features.",
-            image: "/placeholder.svg?height=200&width=400",
-            date: "Mar 28, 2025",
-            readTime: "5 min read",
-            category: "Development",
-            tags: ["Next.js", "React", "Web Development"],
-        },
-        {
-            id: 2,
-            title: "The Future of AI in Software Development",
-            excerpt: "Exploring how artificial intelligence is transforming the way we build software.",
-            image: "/placeholder.svg?height=200&width=400",
-            date: "Mar 25, 2025",
-            readTime: "8 min read",
-            category: "AI",
-            tags: ["Artificial Intelligence", "Machine Learning", "Development"],
-        },
-        {
-            id: 3,
-            title: "Building Accessible Web Applications",
-            excerpt: "Best practices for creating inclusive and accessible web experiences for all users.",
-            image: "/placeholder.svg?height=200&width=400",
-            date: "Mar 22, 2025",
-            readTime: "6 min read",
-            category: "Accessibility",
-            tags: ["Accessibility", "Web Development", "UX"],
-        },
-    ];
-
-    // Categories for filtering
-    const categories = ["All", "Development", "AI", "Accessibility", "Design", "DevOps"];
+    const { blogs } = usePage<Props>().props;
 
     return (
-        <section id="blog" className="w-full py-12 md:py-24 bg-background">
+        <section id="blog" className="bg-background w-full py-12 md:py-24">
             <div className="container mx-auto px-4 md:px-6">
                 <div className="flex flex-col items-center gap-4 md:flex-row md:justify-between md:gap-8">
                     <div className="space-y-2 text-center md:text-left">
                         <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">Latest Blog Posts</h2>
-                        <p className="max-w-[700px] text-muted-foreground">
+                        <p className="text-muted-foreground max-w-[700px]">
                             Stay updated with the latest trends, tutorials, and insights in technology and development.
                         </p>
                     </div>
                     <Link
                         href={route('blogs.index')}
-                        className="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-8 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                        className="border-input bg-background hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring inline-flex h-10 items-center justify-center rounded-md border px-8 text-sm font-medium shadow-sm transition-colors focus-visible:ring-1 focus-visible:outline-none"
                     >
                         View All Posts
                     </Link>
                 </div>
 
                 <Tabs defaultValue="All" className="mt-8">
-                    <TabsList className="mb-6 flex flex-wrap justify-center md:justify-start">
-                        {categories.map((category) => (
-                            <TabsTrigger key={category} value={category} className="mb-2">
-                                {category}
-                            </TabsTrigger>
-                        ))}
-                    </TabsList>
+
                     <TabsContent value="All" className="mt-0">
                         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                             {blogs.map((blog) => (
                                 <Card key={blog.id} className="overflow-hidden transition-all hover:shadow-lg">
-                                    <div className="aspect-video relative">
+                                    <div className="relative aspect-video">
                                         <img
-                                            src={blog.image || "/placeholder.svg"}
+                                            src={blog.image || '/placeholder.svg'}
                                             alt={blog.title}
                                             className="absolute inset-0 h-full w-full object-cover"
                                         />
                                     </div>
                                     <CardHeader>
-                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                            <Badge variant="secondary">{blog.category}</Badge>
-                                            <span>{blog.date}</span>
+                                        <div className="text-muted-foreground flex items-center gap-2 text-sm">
+                                            <span>{blog.published_at}</span>
                                             <span>•</span>
-                                            <span>{blog.readTime}</span>
                                         </div>
-                                        <CardTitle className="line-clamp-2 hover:text-primary">
+                                        <CardTitle className="hover:text-primary line-clamp-2">
                                             <Link href={route('blogs.show', blog.id)}>{blog.title}</Link>
                                         </CardTitle>
                                     </CardHeader>
                                     <CardContent>
-                                        <p className="line-clamp-3 text-muted-foreground">{blog.excerpt}</p>
+                                        <p className="text-muted-foreground line-clamp-3">{blog.excerpt}</p>
                                     </CardContent>
                                     <CardFooter>
                                         <div className="flex flex-wrap gap-2">
                                             {blog.tags.map((tag) => (
-                                                <Badge key={tag} variant="outline" className="hover:bg-secondary">
-                                                    {tag}
+                                                <Badge key={tag.id} variant="outline" className="hover:bg-secondary">
+                                                    {tag.name}
                                                 </Badge>
                                             ))}
                                         </div>
@@ -117,7 +68,7 @@ export default function BlogSection() {
                             ))}
                         </div>
                     </TabsContent>
-                    {/* Other tab contents would be similar but filtered by category */}
+                    {/* Other tab contents would be similar */}
                 </Tabs>
             </div>
         </section>
