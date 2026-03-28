@@ -9,13 +9,6 @@ import { Head } from '@inertiajs/react';
 import { Search } from 'lucide-react';
 import React, { useState } from 'react';
 
-interface Category {
-    id: number;
-    name: string;
-    slug: string;
-    count: number;
-}
-
 interface Tag {
     id: number;
     name: string;

@@ -4,150 +4,160 @@ namespace Database\Seeders;
 
 use App\Models\Product;
 use App\Models\User;
-use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
-use Faker\Factory as Faker;
 
 class ProductSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        $faker = Faker::create();
-
-        // Get all users and assign random IDs
-        $userIds = User::pluck('id')->toArray();
-
-        // Check if we have users
-        if (empty($userIds)) {
-            // Create a default user if none exists
-            $user = User::factory()->create();
-            $userIds = [$user->id];
+        // Grab existing users or create some if none exist
+        $users = User::all();
+        if ($users->isEmpty()) {
+            $users = User::factory(3)->create();
         }
 
-        // Sample product data
         $products = [
+            // ── Open Source ──────────────────────────────────────────────
             [
-                'name' => 'Laravel Nova',
-                'description' => 'Laravel Nova is a beautifully designed administration panel for Laravel. Carefully crafted by the creators of Laravel to make you the most productive developer in the galaxy.',
-                'pricing_type' => 'Free',
-                'is_open_source' => false,
-                'website_url' => 'https://nova.laravel.com',
-                'stars_count' => null,
-                'is_featured' => true,
+                'name'            => 'LaraKit UI',
+                'description'     => '<p>A comprehensive UI component library built specifically for Laravel + Inertia + Vue 3 applications. Ships with 40+ production-ready components, dark mode support, and full TypeScript definitions.</p><p>Designed to drop straight into any <strong>Breeze</strong> or <strong>Jetstream</strong> scaffold without configuration overhead.</p>',
+                'pricing_type'    => 'Free',
+                'is_open_source'  => true,
+                'repo_url'        => 'https://github.com/example/larakit-ui',
+                'website_url'     => 'https://larakitui.dev',
+                'stars_count'     => 1243,
+                'forks_count'     => 178,
+                'watchers_count'  => 94,
+                'is_featured'     => true,
+                'last_synced_at'  => now()->subHours(2),
             ],
             [
-                'name' => 'Tailwind CSS',
-                'description' => 'A utility-first CSS framework packed with classes like flex, pt-4, text-center and rotate-90 that can be composed to build any design, directly in your markup.',
-                'pricing_type' => 'Free',
-                'is_open_source' => true,
-                'repo_url' => 'https://github.com/tailwindlabs/tailwindcss',
-                'website_url' => 'https://tailwindcss.com',
-                'stars_count' => 67500,
-                'is_featured' => true,
+                'name'            => 'Filament Analytics',
+                'description'     => '<p>A plug-and-play analytics plugin for <strong>Filament v3</strong> admin panels. Adds a real-time dashboard widget powered by your own database — no third-party trackers needed.</p><ul><li>Page views, unique visitors, bounce rate</li><li>Top pages and referrers</li><li>Configurable date range filters</li></ul>',
+                'pricing_type'    => 'Free',
+                'is_open_source'  => true,
+                'repo_url'        => 'https://github.com/example/filament-analytics',
+                'website_url'     => null,
+                'stars_count'     => 567,
+                'forks_count'     => 62,
+                'watchers_count'  => 38,
+                'is_featured'     => false,
+                'last_synced_at'  => now()->subHours(6),
             ],
             [
-                'name' => 'Vue.js',
-                'description' => 'An approachable, performant and versatile framework for building web user interfaces.',
-                'pricing_type' => 'Free',
-                'is_open_source' => true,
-                'repo_url' => 'https://github.com/vuejs/vue',
-                'website_url' => 'https://vuejs.org',
-                'stars_count' => 203000,
-                'is_featured' => true,
+                'name'            => 'InertiaTable',
+                'description'     => '<p>Server-side data tables for Inertia.js with built-in sorting, filtering, and pagination. Works out of the box with <strong>Laravel Query Builder</strong> on the backend and Vue 3 on the frontend.</p>',
+                'pricing_type'    => 'Free',
+                'is_open_source'  => true,
+                'repo_url'        => 'https://github.com/example/inertia-table',
+                'website_url'     => 'https://inertia-table.dev',
+                'stars_count'     => 892,
+                'forks_count'     => 134,
+                'watchers_count'  => 71,
+                'is_featured'     => false,
+                'last_synced_at'  => now()->subDay(),
+            ],
+
+            // ── Freemium ─────────────────────────────────────────────────
+            [
+                'name'            => 'PulseBoard',
+                'description'     => '<p><strong>PulseBoard</strong> is a SaaS-ready analytics dashboard starter kit for Laravel. The free tier includes a single workspace; upgrade for multi-tenancy, custom domains, and white-labelling.</p><p>Built with Livewire v3, Alpine.js, and Tailwind CSS. Zero JavaScript build step required.</p>',
+                'pricing_type'    => 'Freemium',
+                'is_open_source'  => false,
+                'repo_url'        => null,
+                'website_url'     => 'https://pulseboard.app',
+                'stars_count'     => 0,
+                'forks_count'     => 0,
+                'watchers_count'  => 0,
+                'is_featured'     => true,
+                'last_synced_at'  => null,
             ],
             [
-                'name' => 'Livewire',
-                'description' => 'Livewire is a full-stack framework for Laravel that makes building dynamic interfaces simple, without leaving the comfort of Laravel.',
-                'pricing_type' => 'Free',
-                'is_open_source' => true,
-                'repo_url' => 'https://github.com/livewire/livewire',
-                'website_url' => 'https://laravel-livewire.com',
-                'stars_count' => 19800,
-                'is_featured' => false,
+                'name'            => 'MailRelay',
+                'description'     => '<p>Transactional email management for Laravel applications. Provides a visual template editor, delivery logs, bounce handling, and webhook support for all major ESP providers (Postmark, SES, Mailgun, Resend).</p>',
+                'pricing_type'    => 'Freemium',
+                'is_open_source'  => false,
+                'repo_url'        => null,
+                'website_url'     => 'https://mailrelay.io',
+                'stars_count'     => 0,
+                'forks_count'     => 0,
+                'watchers_count'  => 0,
+                'is_featured'     => false,
+                'last_synced_at'  => null,
+            ],
+
+            // ── Paid ─────────────────────────────────────────────────────
+            [
+                'name'            => 'SaaSCore Laravel',
+                'description'     => '<p>The complete Laravel SaaS boilerplate — ships with multi-tenancy, subscription billing (Stripe + Paddle), team management, role-based access control, and a polished Inertia + Vue 3 frontend.</p><p>Save hundreds of hours of boilerplate and focus on your product from day one.</p><ul><li>Stripe Billing + Paddle support</li><li>Stancl/Tenancy multi-tenancy</li><li>Spatie Permissions pre-wired</li><li>One-click deploy scripts for Forge & Ploi</li></ul>',
+                'pricing_type'    => 'Paid',
+                'is_open_source'  => false,
+                'repo_url'        => null,
+                'website_url'     => 'https://saascore.dev',
+                'stars_count'     => 0,
+                'forks_count'     => 0,
+                'watchers_count'  => 0,
+                'is_featured'     => true,
+                'last_synced_at'  => null,
             ],
             [
-                'name' => 'Alpine.js',
-                'description' => 'Alpine.js offers you the reactive and declarative nature of big frameworks like Vue or React at a much lower cost.',
-                'pricing_type' => 'Free',
-                'is_open_source' => true,
-                'repo_url' => 'https://github.com/alpinejs/alpine',
-                'website_url' => 'https://alpinejs.dev',
-                'stars_count' => 23700,
-                'is_featured' => false,
+                'name'            => 'PHPCrm',
+                'description'     => '<p>A lightweight CRM built on Laravel with source code included. Manage leads, contacts, deals, and pipelines with a clean Inertia + Vue 3 interface. Single purchase, lifetime updates.</p><p>Ideal for agencies that want to white-label and resell to clients.</p>',
+                'pricing_type'    => 'Paid',
+                'is_open_source'  => false,
+                'repo_url'        => null,
+                'website_url'     => 'https://phpcrm.dev',
+                'stars_count'     => 0,
+                'forks_count'     => 0,
+                'watchers_count'  => 0,
+                'is_featured'     => false,
+                'last_synced_at'  => null,
+            ],
+
+            // ── Subscription ─────────────────────────────────────────────
+            [
+                'name'            => 'LogPilot',
+                'description'     => '<p><strong>LogPilot</strong> is a hosted error and log monitoring service with a first-class Laravel SDK. Drop in the package, set your API key, and get Slack/email alerts, stack traces, and performance insights within minutes.</p>',
+                'pricing_type'    => 'Subscription',
+                'is_open_source'  => false,
+                'repo_url'        => null,
+                'website_url'     => 'https://logpilot.io',
+                'stars_count'     => 0,
+                'forks_count'     => 0,
+                'watchers_count'  => 0,
+                'is_featured'     => false,
+                'last_synced_at'  => null,
             ],
             [
-                'name' => 'Laravel Forge',
-                'description' => "Instant PHP Servers. Server management doesn't have to be a nightmare. Provision and deploy unlimited PHP applications on DigitalOcean, Linode, and more.",
-                'pricing_type' => 'Free',
-                'is_open_source' => false,
-                'website_url' => 'https://forge.laravel.com',
-                'stars_count' => null,
-                'is_featured' => true,
+                'name'            => 'DeployHQ',
+                'description'     => '<p>Automated deployment pipelines tailored for PHP/Laravel applications. Connect your Git repo, define your stages (staging → production), and ship with confidence. Built-in zero-downtime deploys, Horizon restarts, and migration runners.</p>',
+                'pricing_type'    => 'Subscription',
+                'is_open_source'  => false,
+                'repo_url'        => null,
+                'website_url'     => 'https://deployhq.app',
+                'stars_count'     => 0,
+                'forks_count'     => 0,
+                'watchers_count'  => 0,
+                'is_featured'     => false,
+                'last_synced_at'  => null,
             ],
-            [
-                'name' => 'React',
-                'description' => 'A JavaScript library for building user interfaces. React makes it painless to create interactive UIs.',
-                'pricing_type' => 'Free',
-                'is_open_source' => true,
-                'repo_url' => 'https://github.com/facebook/react',
-                'website_url' => 'https://reactjs.org',
-                'stars_count' => 192000,
-                'is_featured' => true,
-            ],
-            [
-                'name' => 'Next.js',
-                'description' => 'The React Framework for Production. Next.js gives you the best developer experience with all the features you need for production.',
-                'pricing_type' => 'Free',
-                'is_open_source' => true,
-                'repo_url' => 'https://github.com/vercel/next.js',
-                'website_url' => 'https://nextjs.org',
-                'stars_count' => 89700,
-                'is_featured' => false,
-            ],
-            [
-                'name' => 'Inertia.js',
-                'description' => 'The Modern Monolith. Inertia.js lets you quickly build modern single-page React, Vue and Svelte apps using classic server-side routing and controllers.',
-                'pricing_type' => 'Free',
-                'is_open_source' => true,
-                'repo_url' => 'https://github.com/inertiajs/inertia',
-                'website_url' => 'https://inertiajs.com',
-                'stars_count' => 16400,
-                'is_featured' => false,
-            ],
-            [
-                'name' => 'Laravel Vapor',
-                'description' => 'Laravel Vapor is a serverless deployment platform for Laravel, powered by AWS. Launch your Laravel infrastructure on Vapor and fall in love with the scalable simplicity of serverless.',
-                'pricing_type' => 'Free',
-                'is_open_source' => false,
-                'website_url' => 'https://vapor.laravel.com',
-                'stars_count' => null,
-                'is_featured' => true,
-            ]
         ];
 
-        // Create the products
-        foreach ($products as $key => $productData) {
-            $name = $productData['name'];
-            $pricingTypes = ['Free', 'Freemium', 'Paid'];
+        foreach ($products as $data) {
+            $user = $users->random();
+            $name = $data['name'];
 
-            Product::create([
-                'name' => $name,
-                'slug' => Str::slug($name). $key,
-                'description' => $productData['description'],
-                'image' => $faker->imageUrl(640, 480, null, true),  // Generates a random image URL
-                'user_id' => $faker->randomElement($userIds),
-                'pricing_type' => $faker->randomElement($pricingTypes),
-                'is_open_source' => $productData['is_open_source'],
-                'repo_url' => $productData['is_open_source'] ? $productData['repo_url'] : null,
-                'website_url' => $productData['website_url'],
-                'stars_count' => $productData['is_open_source'] ? $productData['stars_count'] : null,
-                'is_featured' => $productData['is_featured'],
-            ]);
+            Product::updateOrCreate(
+                ['slug' => Str::slug($name)],
+                array_merge($data, [
+                    'user_id' => $user->id,
+                    'slug'    => Str::slug($name),
+                    'image'   => null, // swap with a real URL or Storage path if needed
+                ])
+            );
         }
 
+        $this->command->info('✅  Seeded ' . count($products) . ' products.');
     }
 }

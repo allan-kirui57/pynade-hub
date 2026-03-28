@@ -81,7 +81,7 @@ class ProductController extends Controller
             ->take(3)
             ->get();
 
-        return Inertia::render('frontend/products', [
+        return Inertia::render('frontend/products/index', [
             'products' => $products,
             'featuredProducts' => $featuredProducts,
             'popularProducts' => $popularProducts,
@@ -92,16 +92,16 @@ class ProductController extends Controller
         ]);
     }
 
-    public function show($slug)
+    public function show(Product $product)
     {
-        $product = Product::with(['relatedProducts'])
-            ->where('slug', $slug)
-            ->firstOrFail();
+//        $product = Product::with(['relatedProducts'])
+//            ->where('slug', $slug)
+//            ->firstOrFail();
 
         // Increment view count
-        $product->increment('views');
+//        $product->increment('views');
 
-        return Inertia::render('Products/Show', [
+        return Inertia::render('frontend/products/show', [
             'product' => $product,
         ]);
     }

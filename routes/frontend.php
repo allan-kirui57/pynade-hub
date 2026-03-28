@@ -7,13 +7,13 @@ use App\Http\Controllers\Frontend\ProductController;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('/blogs', [BlogController::class, 'index'])->name('blogs.index');
-Route::get('/blogs/{blog:slug}', [BlogController::class, 'show'])->name('blogs.show');
+Route::get('/blogs/{blog}', [BlogController::class, 'show'])->name('blogs.show');
 
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
-Route::get('/products/{product:slug}', [ProductController::class, 'show'])->name('products.show');
+Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
 // Product routes
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
-Route::get('/products/{slug}', [ProductController::class, 'show'])->name('products.show');
+//Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
 Route::get('/products/featured', [ProductController::class, 'featured'])->name('products.featured');
 Route::get('/products/popular', [ProductController::class, 'popular'])->name('products.popular');
 Route::get('/products/new', [ProductController::class, 'new'])->name('products.new');

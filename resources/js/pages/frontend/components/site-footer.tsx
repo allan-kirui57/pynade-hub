@@ -3,114 +3,127 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Github, Twitter, Linkedin, Facebook } from "lucide-react"
 
+const socialLinks = [
+    { icon: Twitter, href: 'https://x.com/pynade', label: 'Twitter' },
+    { icon: Facebook, href: 'https://web.facebook.com/pynade', label: 'Facebook' },
+    { icon: Linkedin, href: 'https://www.linkedin.com/in/allan-kirui/', label: 'LinkedIn' },
+    { icon: Github, href: 'https://github.com/allan-kirui57', label: 'GitHub' },
+];
+
+const footerLinks = {
+    Resources: [
+        { label: 'Blog', href: '/blogs' },
+        { label: 'Products', href: '/products' },
+    ],
+    Company: [
+        { label: 'About', href: '/about' },
+        { label: 'Contact', href: '/contact' },
+        { label: 'Privacy', href: '/privacy' },
+        { label: 'Terms', href: '/terms' },
+    ],
+};
+
+const legalLinks = [
+    { label: 'Privacy Policy', href: '/privacy' },
+    { label: 'Terms of Service', href: '/terms' },
+    { label: 'Cookie Policy', href: '/cookies' },
+];
+
 export function SiteFooter() {
     return (
         <footer className="w-full border-t bg-background">
-            <div className="container px-4 py-12 md:px-6 md:py-16 lg:py-20">
-                <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5">
-                    <div className="lg:col-span-2">
-                        <Link href="/" className="flex items-center space-x-2">
-                            <span className="inline-block h-6 w-6 rounded-full bg-primary"></span>
-                            <span className="font-bold">TechHub</span>
+            <div className="container mx-auto px-4 md:px-6 py-12 md:py-16">
+
+                {/* 4-column grid matching the header's container width */}
+                <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1.5fr]">
+
+                    {/* Col 1 — Brand */}
+                    <div className="flex flex-col">
+                        <Link
+                            href="/"
+                            className="group inline-flex items-center gap-2 w-fit rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        >
+                            <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-primary shadow-sm transition-transform duration-200 group-hover:scale-110">
+                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="7" cy="7" r="3" fill="currentColor" className="text-primary-foreground" />
+                                    <circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.5" className="text-primary-foreground" strokeOpacity="0.4" />
+                                </svg>
+                            </span>
+                            <span className="font-bold text-base tracking-tight">TechHub</span>
                         </Link>
-                        <p className="mt-4 max-w-xs text-sm text-muted-foreground">
-                            Your gateway to tech resources, connecting developers with blogs, products, and job opportunities.
+
+                        <p className="mt-4 text-sm text-muted-foreground leading-relaxed max-w-[220px]">
+                            Your gateway to tech resources — connecting developers with blogs, products, and opportunities.
                         </p>
-                        <div className="mt-6 flex space-x-4">
-                            <Link href="https://x.com/pynade" className="text-muted-foreground hover:text-foreground">
-                                <Twitter className="h-5 w-5" />
-                                <span className="sr-only">Twitter</span>
-                            </Link>
-                            <Link href="https://web.facebook.com/pynade" className="text-muted-foreground hover:text-foreground">
-                                <Facebook className="h-5 w-5" />
-                                <span className="sr-only">Facebook</span>
-                            </Link>
-                            <Link href="https://www.linkedin.com/in/allan-kirui/" className="text-muted-foreground hover:text-foreground">
-                                <Linkedin className="h-5 w-5" />
-                                <span className="sr-only">LinkedIn</span>
-                            </Link>
-                            <Link href="https://github.com/allan-kirui57" className="text-muted-foreground hover:text-foreground">
-                                <Github className="h-5 w-5" />
-                                <span className="sr-only">GitHub</span>
-                            </Link>
+
+                        <div className="mt-6 flex items-center gap-0.5">
+                            {socialLinks.map(({ icon: Icon, href, label }) => (
+                                <a
+                                    key={label}
+                                    href={href}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    aria-label={label}
+                                    className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors duration-150 hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                >
+                                    <Icon className="h-4 w-4" />
+                                </a>
+                            ))}
                         </div>
                     </div>
-                    <div>
-                        <h3 className="text-sm font-medium">Resources</h3>
-                        <ul className="mt-4 space-y-2 text-sm">
-                            <li>
-                                <Link href="/blog" className="text-muted-foreground hover:text-foreground">
-                                    Blog
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/products" className="text-muted-foreground hover:text-foreground">
-                                    Products
-                                </Link>
-                            </li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h3 className="text-sm font-medium">Company</h3>
-                        <ul className="mt-4 space-y-2 text-sm">
-                            <li>
-                                <Link href="/about" className="text-muted-foreground hover:text-foreground">
-                                    About
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/careers" className="text-muted-foreground hover:text-foreground">
-                                    Careers
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/contact" className="text-muted-foreground hover:text-foreground">
-                                    Contact
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/privacy" className="text-muted-foreground hover:text-foreground">
-                                    Privacy
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/terms" className="text-muted-foreground hover:text-foreground">
-                                    Terms
-                                </Link>
-                            </li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h3 className="text-sm font-medium">Subscribe</h3>
-                        <p className="mt-4 text-sm text-muted-foreground">
-                            Get the latest updates and news delivered to your inbox.
+
+                    {/* Col 2 & 3 — Nav link groups */}
+                    {Object.entries(footerLinks).map(([title, links]) => (
+                        <div key={title}>
+                            <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+                            <ul className="mt-4 space-y-2.5">
+                                {links.map(({ label, href }) => (
+                                    <li key={label}>
+                                        <Link
+                                            href={href}
+                                            className="text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground"
+                                        >
+                                            {label}
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    ))}
+
+                    {/* Col 4 — Newsletter */}
+                    <div className="flex flex-col">
+                        <h3 className="text-sm font-semibold text-foreground">Stay Updated</h3>
+                        <p className="mt-4 text-sm text-muted-foreground leading-relaxed">
+                            Get the latest articles and products delivered to your inbox.
                         </p>
-                        <form className="mt-4 flex flex-col gap-2">
-                            <Input type="email" placeholder="Enter your email" />
-                            <Button type="submit">Subscribe</Button>
-                        </form>
+                        <div className="mt-4 flex flex-col gap-2">
+                            <Input type="email" placeholder="you@example.com" className="h-9 text-sm" />
+                            <Button size="sm" className="w-full font-medium">Subscribe</Button>
+                        </div>
                     </div>
                 </div>
+
+                {/* Bottom bar */}
                 <div className="mt-12 border-t pt-6">
-                    <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-                        <p className="text-center text-sm text-muted-foreground">
+                    <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
+                        <p className="text-sm text-muted-foreground">
                             &copy; {new Date().getFullYear()} TechHub. All rights reserved.
                         </p>
-                        <div className="flex gap-4 text-sm text-muted-foreground">
-                            <Link href="/privacy" className="hover:text-foreground">
-                                Privacy Policy
-                            </Link>
-                            <Link href="/terms" className="hover:text-foreground">
-                                Terms of Service
-                            </Link>
-                            <Link href="/cookies" className="hover:text-foreground">
-                                Cookie Policy
-                            </Link>
+                        <div className="flex flex-wrap justify-center gap-x-5 gap-y-1">
+                            {legalLinks.map(({ label, href }) => (
+                                <Link
+                                    key={label}
+                                    href={href}
+                                    className="text-xs text-muted-foreground transition-colors duration-150 hover:text-foreground"
+                                >
+                                    {label}
+                                </Link>
+                            ))}
                         </div>
                     </div>
                 </div>
             </div>
         </footer>
-    )
+    );
 }
-

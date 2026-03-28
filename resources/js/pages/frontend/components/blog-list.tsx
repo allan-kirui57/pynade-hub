@@ -45,7 +45,7 @@ export default function BlogList({ blogs }: BlogListProps) {
                 <article key={blog.id} className="group flex flex-col">
                     {/* Thumbnail */}
                     <Link
-                        href={route('frontend.blogs.show', blog.slug)}
+                        href={route('blogs.show', blog.slug)}
                         className="block overflow-hidden rounded-xl"
                     >
                         <img
@@ -61,7 +61,7 @@ export default function BlogList({ blogs }: BlogListProps) {
                         {/* Title */}
                         <h2 className="text-lg font-bold leading-snug tracking-tight text-foreground">
                             <Link
-                                href={route('frontend.blogs.show', blog.slug)}
+                                href={route('blogs.show', blog.slug)}
                                 className="hover:text-primary transition-colors duration-150 line-clamp-2"
                             >
                                 {blog.title}

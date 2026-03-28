@@ -20,7 +20,6 @@ interface ProductFiltersProps {
 }
 
 export default function ProductFilters({
-                                           selectedCategory,
                                            selectedPricing,
                                            selectedSort,
                                            isOpenSource,
