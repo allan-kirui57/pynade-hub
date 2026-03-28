@@ -30,7 +30,7 @@ class ProductController extends Controller
 
         // Apply pricing filter
         if ($pricing) {
-            $query->where('pricing', ucfirst($pricing));
+            $query->where('pricing_type', ucfirst($pricing));
         }
 
         // Apply open source filter
@@ -84,8 +84,6 @@ class ProductController extends Controller
         return Inertia::render('frontend/products/index', [
             'products' => $products,
             'featuredProducts' => $featuredProducts,
-            'popularProducts' => $popularProducts,
-            'newArrivals' => $newArrivals,
             'openSourcePicks' => $openSourcePicks,
             'filters' => $request->only(['search', 'pricing', 'open_source', 'sort']),
 

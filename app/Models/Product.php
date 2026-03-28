@@ -19,7 +19,10 @@ class Product extends Model
         'image',
         'user_id',
         'pricing_type',
+        'selling_price',
+        'discounted_price',
         'is_open_source',
+        'is_on_offer',
         'repo_url',
         'website_url',
         'stars_count',
@@ -31,6 +34,7 @@ class Product extends Model
 
     protected $casts = [
         'is_open_source' => 'boolean',
+        'is_on_offer' => 'boolean',
         'stars_count' => 'integer',
         'forks_count' => 'integer',
         'watchers_count' => 'integer',

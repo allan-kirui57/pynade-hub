@@ -1,32 +1,14 @@
-import React, { useState } from 'react';
-import { Head } from '@inertiajs/react';
-import { SiteHeader } from '@/pages/frontend/components/site-header';
-import { SiteFooter } from '@/pages/frontend/components/site-footer';
-import ProductList from '@/pages/frontend/components/product-list';
-import ProductSidebar from '@/pages/frontend/components/product-sidebar';
-import ProductFilters from '@/pages/frontend/components/product-filters';
 import { Pagination } from '@/components/pagination';
 import { Input } from '@/components/ui/input';
+import ProductFilters from '@/pages/frontend/components/product-filters';
+import ProductList from '@/pages/frontend/components/product-list';
+import ProductSidebar from '@/pages/frontend/components/product-sidebar';
+import { SiteFooter } from '@/pages/frontend/components/site-footer';
+import { SiteHeader } from '@/pages/frontend/components/site-header';
+import { Product } from '@/types/product';
+import { Head } from '@inertiajs/react';
 import { Search } from 'lucide-react';
-
-
-interface Product {
-    id: number;
-    title: string;
-    slug: string;
-    description: string;
-    image: string;
-    pricing: "Free" | "Freemium" | "Paid";
-    stars?: number;
-    language?: string;
-    repoUrl?: string;
-    comments: number;
-    upvotes: number;
-    downvotes: number;
-    link: string;
-    isOpenSource: boolean;
-    created_at: string;
-}
+import React, { useState } from 'react';
 
 interface PaginationLinks {
     url: string | null;
@@ -58,14 +40,7 @@ interface Props {
     };
 }
 
-export default function Index({
-                                  products,
-                                  featuredProducts,
-                                  popularProducts,
-                                  newArrivals,
-                                  openSourcePicks,
-                                  filters = {},
-                              }: Props) {
+export default function Index({ products, featuredProducts, openSourcePicks, filters = {} }: Props) {
     const [searchQuery, setSearchQuery] = useState(filters?.search || '');
 
     const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
@@ -78,16 +53,16 @@ export default function Index({
             <Head title="Products - TechHub" />
             <div className="flex min-h-screen flex-col">
                 <SiteHeader />
-                <main className="flex-1 bg-muted/30">
+                <main className="bg-muted/30 flex-1">
                     <div className="container mx-auto px-4 py-8 md:px-6 md:py-12">
                         <div className="mb-8 text-center">
                             <h1 className="text-4xl font-bold tracking-tight md:text-5xl">Products</h1>
-                            <p className="mt-4 text-xl text-muted-foreground">
+                            <p className="text-muted-foreground mt-4 text-xl">
                                 Discover innovative tech products and open source projects across various industries.
                             </p>
                             <form onSubmit={handleSearch} className="mx-auto mt-6 max-w-md">
                                 <div className="relative">
-                                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                    <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
                                     <Input
                                         type="search"
                                         placeholder="Search products..."
@@ -99,11 +74,7 @@ export default function Index({
                             </form>
                         </div>
 
-                        <ProductFilters
-                            selectedPricing={filters?.pricing}
-                            selectedSort={filters?.sort}
-                            isOpenSource={filters?.openSource}
-                        />
+                        <ProductFilters selectedPricing={filters?.pricing} selectedSort={filters?.sort} isOpenSource={filters?.openSource} />
 
                         <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-4">
                             <div className="order-2 lg:order-1 lg:col-span-3">
@@ -124,8 +95,6 @@ export default function Index({
                             <div className="order-1 lg:order-2">
                                 <ProductSidebar
                                     featuredProducts={featuredProducts}
-                                    popularProducts={popularProducts}
-                                    newArrivals={newArrivals}
                                     openSourcePicks={openSourcePicks}
                                 />
                             </div>

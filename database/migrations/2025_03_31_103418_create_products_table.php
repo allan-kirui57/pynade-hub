@@ -15,7 +15,10 @@ return new class extends Migration
             $table->string('name');
             $table->string('slug')->unique();
             $table->text('description');
-            $table->string('image')->nullable();
+            $table->string('image_url')->nullable();
+            $table->string('file_url')->nullable();
+            $table->string('selling_price')->nullable();
+            $table->string('discounted_price')->nullable();
             $table->enum('pricing_type', ['Free', 'Freemium', 'Paid', 'Subscription'])->default('Free');
             $table->boolean('is_open_source')->default(false);
             $table->string('repo_url')->nullable();
@@ -25,6 +28,7 @@ return new class extends Migration
             $table->unsignedInteger('watchers_count')->default(0);
             $table->timestamp('last_synced_at')->nullable();
             $table->boolean('is_featured')->default(false);
+            $table->boolean('is_on_offer')->default(false);
             $table->timestamps();
             $table->softDeletes();
         });

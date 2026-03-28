@@ -1,135 +1,144 @@
-import React from 'react';
 import { Link } from '@inertiajs/react';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Button } from '@/components/ui/button';
-import { ThumbsUp, ThumbsDown, MessageSquare, ExternalLink, Star, GitlabIcon as GitHubLogoIcon } from 'lucide-react';
-
-interface Product {
-    id: number;
-    title: string;
-    slug: string;
-    description: string;
-    image: string;
-    pricing: "Free" | "Freemium" | "Paid";
-    stars?: number;
-    language?: string;
-    repoUrl?: string;
-    comments: number;
-    upvotes: number;
-    downvotes: number;
-    link: string;
-    isOpenSource: boolean;
-    created_at: string;
-}
+import { ExternalLink, GitBranch, Globe, Lock } from 'lucide-react';
+import { Product, PricingType } from '@/types/product';
 
 interface ProductListProps {
     products: Product[];
 }
 
-export default function ProductList({ products }: ProductListProps) {
-    // Pricing badge variants
-    const pricingVariants = {
-        Free: "secondary",
-        Freemium: "outline",
-        Paid: "default",
-    };
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
-    if (products.length === 0) {
-        return (
-            <div className="flex h-40 items-center justify-center rounded-lg border border-dashed bg-background p-8 text-center">
-                <div>
-                    <p className="text-muted-foreground">No products found.</p>
-                    <p className="mt-2 text-sm text-muted-foreground">Try adjusting your search or filter criteria.</p>
+/** Return only the first sentence of a description string, stripping HTML tags. */
+function firstSentence(html: string): string {
+    const plain = html.replace(/<[^>]*>/g, '').trim();
+    const match = plain.match(/^[^.!?]*[.!?]/);
+    return match ? match[0].trim() : plain.slice(0, 120);
+}
+
+const PRICING_STYLES: Record<PricingType, string> = {
+    Free: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800',
+    Freemium: 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-800',
+    Paid: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800',
+    // Subscription: 'bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-950/40 dark:text-violet-400 dark:border-violet-800',
+};
+
+// ── Empty state ───────────────────────────────────────────────────────────────
+
+function EmptyState() {
+    return (
+        <div className="bg-background flex h-48 flex-col items-center justify-center gap-2 rounded-xl border border-dashed px-6 text-center">
+            <p className="text-muted-foreground text-sm font-medium">No products found.</p>
+            <p className="text-muted-foreground text-xs">Try adjusting your search or filter criteria.</p>
+        </div>
+    );
+}
+
+// ── Product row ───────────────────────────────────────────────────────────────
+
+function ProductRow({ product, rank }: { product: Product; rank: number }) {
+    const sentence = firstSentence(product.description);
+
+    return (
+        <div className="group hover:bg-muted/40 flex items-start gap-4 rounded-none px-4 py-4 transition-colors sm:px-6">
+            {/* Rank number */}
+            <span className="text-muted-foreground/50 hidden w-6 shrink-0 pt-1 text-sm font-medium tabular-nums sm:flex">{rank}.</span>
+
+            {/* Product thumbnail */}
+            <div className="bg-muted flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-none border shadow-sm">
+                <Link
+                    href={route('products.show', product.id)}
+                    className="hover:text-primary text-base leading-tight font-semibold transition-colors"
+                >
+                    {product.image ? (
+                        <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
+                    ) : (
+                        <span className="text-muted-foreground text-xl font-bold select-none">{product.name.charAt(0).toUpperCase()}</span>
+                    )}
+                </Link>
+            </div>
+
+            {/* Main info */}
+            <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                    <Link
+                        href={route('products.show', product.id)}
+                        className="hover:text-primary text-base leading-tight font-semibold transition-colors"
+                    >
+                        {product.name}
+                    </Link>
+
+                    {product.is_featured && (
+                        <span className="bg-primary/10 border-primary/20 text-primary inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase">
+                            ✦ Featured
+                        </span>
+                    )}
+                </div>
+
+                {/* One-sentence description */}
+                <p className="text-muted-foreground mt-0.5 line-clamp-1 text-sm leading-snug">{sentence}</p>
+
+                {/* Meta row */}
+                <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+                    {/* Pricing badge */}
+                    <span
+                        className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium ${PRICING_STYLES[product.pricing_type]}`}
+                    >
+                        {product.pricing_type}
+                    </span>
+
+                    {/* Open source tag */}
+                    {product.is_open_source ? (
+                        <span className="text-muted-foreground flex items-center gap-1 text-xs">
+                            <GitBranch className="h-3 w-3" />
+                            Open Source
+                        </span>
+                    ) : (
+                        <span className="text-muted-foreground flex items-center gap-1 text-xs">
+                            <Lock className="h-3 w-3" />
+                            Closed Source
+                        </span>
+                    )}
+
+                    {/* External links */}
+                    {product.website_url && (
+                        <a
+                            href={product.website_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-xs transition-colors"
+                        >
+                            <Globe className="h-3 w-3" />
+                            Website
+                        </a>
+                    )}
+                    {product.repo_url && (
+                        <a
+                            href={product.repo_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-xs transition-colors"
+                        >
+                            <ExternalLink className="h-3 w-3" />
+                            Repo
+                        </a>
+                    )}
                 </div>
             </div>
-        );
+        </div>
+    );
+}
+
+// ── Main component ────────────────────────────────────────────────────────────
+
+export default function ProductList({ products }: ProductListProps) {
+    if (products.length === 0) {
+        return <EmptyState />;
     }
 
     return (
-        <div className="grid gap-6 sm:grid-cols-2">
-            {products.map((product) => (
-                <Card key={product.id} className="flex flex-col overflow-hidden transition-all hover:shadow-lg">
-                    <div className="aspect-video relative">
-                        <img
-                            src={product.image || "/placeholder.svg?height=200&width=400"}
-                            alt={product.title}
-                            className="absolute inset-0 h-full w-full object-cover"
-                        />
-                        <div className="absolute right-2 top-2">
-                            <Badge variant={pricingVariants[product.pricing] as "default" | "secondary" | "outline"}>
-                                {product.pricing}
-                            </Badge>
-                        </div>
-                    </div>
-                    <CardHeader>
-                        <div className="flex items-center justify-between">
-
-                            <div className="flex items-center gap-2">
-                                {product.isOpenSource && product.stars && (
-                                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                                        <Star className="h-3.5 w-3.5" />
-                                        <span>{product.stars.toLocaleString()}</span>
-                                    </div>
-                                )}
-                                <a
-                                    href={product.link}
-                                    className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    <ExternalLink className="h-4 w-4" />
-                                    Visit
-                                </a>
-                            </div>
-                        </div>
-                        <CardTitle className="mt-2">
-                            <Link href={route('products.show', product.slug)} className="hover:text-primary">
-                                {product.title}
-                            </Link>
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex-grow">
-                        <p className="text-muted-foreground">{product.description}</p>
-
-                        {product.isOpenSource && product.language && (
-                            <div className="mt-4 flex items-center gap-2">
-                                <Badge>{product.language}</Badge>
-                                {product.repoUrl && (
-                                    <a
-                                        href={product.repoUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-                                    >
-                                        <GitHubLogoIcon className="h-4 w-4" />
-                                        GitHub
-                                    </a>
-                                )}
-                            </div>
-                        )}
-                    </CardContent>
-                    <Separator />
-                    <CardFooter className="pt-4">
-                        <div className="flex w-full items-center justify-between">
-                            <Button variant="ghost" size="sm" className="gap-1">
-                                <MessageSquare className="h-4 w-4" />
-                                <span>{product.comments}</span>
-                            </Button>
-                            <div className="flex items-center gap-2">
-                                <Button variant="ghost" size="sm" className="gap-1">
-                                    <ThumbsUp className="h-4 w-4" />
-                                    <span>{product.upvotes}</span>
-                                </Button>
-                                <Button variant="ghost" size="sm" className="gap-1">
-                                    <ThumbsDown className="h-4 w-4" />
-                                    <span>{product.downvotes}</span>
-                                </Button>
-                            </div>
-                        </div>
-                    </CardFooter>
-                </Card>
+        <div className="bg-background flex flex-col divide-y overflow-hidden rounded-none border">
+            {products.map((product, index) => (
+                <ProductRow key={product.id} product={product} rank={index + 1} />
             ))}
         </div>
     );

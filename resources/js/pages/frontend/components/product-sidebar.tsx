@@ -5,24 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Star, ThumbsUp } from 'lucide-react';
-
-interface Product {
-    id: number;
-    title: string;
-    slug: string;
-    description: string;
-    image: string;
-    pricing: "Free" | "Freemium" | "Paid";
-    stars?: number;
-    language?: string;
-    repoUrl?: string;
-    comments: number;
-    upvotes: number;
-    downvotes: number;
-    link: string;
-    isOpenSource: boolean;
-    created_at: string;
-}
+import { Product } from '@/types/product';
 
 interface ProductSidebarProps {
     featuredProducts: Product[];
@@ -33,8 +16,6 @@ interface ProductSidebarProps {
 
 export default function ProductSidebar({
                                            featuredProducts,
-                                           popularProducts,
-                                           newArrivals,
                                            openSourcePicks
                                        }: ProductSidebarProps) {
     // Pricing badge variants
@@ -49,21 +30,21 @@ export default function ProductSidebar({
             <div className="flex gap-3">
                 <img
                     src={product.image || '/placeholder.svg?height=60&width=60'}
-                    alt={product.title}
-                    className="h-16 w-16 rounded-md object-cover"
+                    alt={product.name}
+                    className="h-16 w-16 rounded-none object-cover"
                 />
                 <div className="flex flex-col">
                     <div className="flex items-center justify-between">
                         <Badge
-                            variant={pricingVariants[product.pricing] as "default" | "secondary" | "outline"}
+                            variant={pricingVariants[product.pricing_type] as "default" | "secondary" | "outline"}
                             className="mb-1 text-xs"
                         >
-                            {product.pricing}
+                            {product.pricing_type}
                         </Badge>
-                        {product.isOpenSource && product.stars && (
+                        {product.is_open_source && product.stars_count && (
                             <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                 <Star className="h-3 w-3" />
-                                <span>{product.stars.toLocaleString()}</span>
+                                <span>{product.stars_count.toLocaleString()}</span>
                             </div>
                         )}
                     </div>
@@ -71,12 +52,12 @@ export default function ProductSidebar({
                         href={route('products.show', product.slug)}
                         className="line-clamp-2 text-sm font-medium group-hover:text-primary"
                     >
-                        {product.title}
+                        {product.name}
                     </Link>
                     <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
                         <div className="flex items-center gap-1">
                             <ThumbsUp className="h-3 w-3" />
-                            <span>{product.upvotes}</span>
+                            <span>{product.stars_count}</span>
                         </div>
                     </div>
                 </div>
@@ -88,7 +69,7 @@ export default function ProductSidebar({
     return (
         <div className="space-y-6">
             {/* Featured Products Section */}
-            <Card>
+            <Card className="rounded-none">
                 <CardHeader>
                     <CardTitle>Featured Products</CardTitle>
                 </CardHeader>
@@ -104,42 +85,8 @@ export default function ProductSidebar({
                 </CardContent>
             </Card>
 
-            {/* Popular Products Section */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Most Upvoted</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-4">
-                        {popularProducts?.map(renderProductItem)}
-                    </div>
-                    <div className="mt-4 text-center">
-                        <Link href={route('products.popular')}>
-                            <Button variant="outline" size="sm" className="w-full">View All Popular</Button>
-                        </Link>
-                    </div>
-                </CardContent>
-            </Card>
-
-            {/* New Arrivals Section */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>New Arrivals</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-4">
-                        {newArrivals?.map(renderProductItem)}
-                    </div>
-                    <div className="mt-4 text-center">
-                        <Link href={route('products.new')}>
-                            <Button variant="outline" size="sm" className="w-full">View All New</Button>
-                        </Link>
-                    </div>
-                </CardContent>
-            </Card>
-
             {/* Open Source Picks Section */}
-            <Card>
+            <Card className="rounded-none">
                 <CardHeader>
                     <CardTitle>Open Source Picks</CardTitle>
                 </CardHeader>
